@@ -1,0 +1,6 @@
+django-cloudinary-storage==0.3.0
+cryptography==3.4.8
+Django==4.2.9
+django-allauth==64.2.1
+django-social-auth==0.7.28
+google-generativeai==0.7.2

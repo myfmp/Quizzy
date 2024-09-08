@@ -1,6 +1,7 @@
 django-cloudinary-storage==0.3.0
 cryptography==3.4.8
 Django==4.2.9
+django-compat==1.0.15
 django-allauth==64.2.1
 social-auth-app-django==5.4.1
 social-auth-core==4.5.4

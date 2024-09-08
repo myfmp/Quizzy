@@ -13,7 +13,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Run Django management commands
-python manage.py collectstatic --noinput
+python3.9 manage.py collectstatic
 
 # Additional build steps (if any)
 # e.g., python manage.py migrate, etc.

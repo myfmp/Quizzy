@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+
+  {% load static %}
+
+  <title>Quizzy - Editor</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/editor.css' %}">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>  
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+  <script>
+  window.console = window.console || function(t) {};
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+  
+</head>
+
+<body translate="no">
+
+<div class="container">
+  
+
+<nav class="navbar">
+  <ul class="navbar__menu">
+    <li class="navbar__item" id="how-to-home-nav">
+      <a href="dashboard" class="navbar__link"><i data-feather="home"></i><span>Home</span></a>
+    </li>
+    <li class="navbar__item" id="how-to-add-question-nav">
+      <a href="#" id="open-modal" class="navbar__link"><i data-feather="message-square"></i><span>Question</span></a>    
+    </li>
+    <li class="navbar__item" id="how-to-correct-nav">
+      <a href="#" class="navbar__link" onclick="Correct()"><i data-feather="check-square"></i><span id="how-it-works-auto-correction">Corrector</span></a>        
+    </li>
+    <li class="navbar__item" id="how-to-convert-nav">
+      <a href="#" class="navbar__link" onclick="Uploader()"><i data-feather="refresh-ccw"></i><span id="how-it-works-auto-convertion">Convert</span></a>      
+    </li>
+    <li class="navbar__item" id="how-to-latex-nav">
+      <a href="#" class="navbar__link" onclick="Math_Expressions()"><i data-feather="divide-square"></i><span id="how-it-works-math-expresions">LaTeX</span></a>        
+    </li>
+    <li class="navbar__item" id="how-to-preview-nav">
+      <a href="quiz?session={{Quizz_id}}" class="navbar__link" target="_blank"><i data-feather="eye"></i><span id="how-it-works-preview">Preview</span></a>        
+    </li>
+    <li class="navbar__item" id="how-to-help-nav">
+      <a href="#" class="navbar__link" onclick="Tutorial()"><i data-feather="help-circle"></i><span>Help</span></a>        
+    </li>
+    <li class="navbar__item" id="how-to-settings-nav">
+      <a href="#" class="navbar__link" onclick="Open_Setting()"><i data-feather="settings"></i><span id="how-it-works-settings">Settings</span></a>        
+    </li>
+  </ul>
+</nav>
+
+<div id="quizz_body">
+
+  {% csrf_token %}
+
+  <div id="quizz_header">
+    <h1 id="quizz_title" contenteditable="true"> {{Quizz_Title}}</h1>
+    <button id="title_button" class="save_buttons" onclick="Change_Title()"> <div class="save-text" >Save</div> <div class="custom-loader"></div> </button>
+  </div>
+
+  <div id="jquery_load">
+
+  <div id="Questions_body">
+    
+    {% for Load_Quizz_Questions in Quizz_Questions %}
+
+    <div class="Question question_id_{{ Load_Quizz_Questions.0 }}" id="{{ Load_Quizz_Questions.1 }}">
+
+      <textarea id="question_content_{{ Load_Quizz_Questions.0 }}" class="question_content" oninput="DisplaySaveButton('{{ Load_Quizz_Questions.0 }}')" type="text">{{ Load_Quizz_Questions.2 }}</textarea>
+
+      <div class="choice_body" id="choice_body_{{ Load_Quizz_Questions.0 }}">
+
+        {% for Load_Questions_Choices in Questions_Choices %}
+
+         {% if Load_Questions_Choices.1|floatformat:0 == Load_Quizz_Questions.0|floatformat:0 %}  
+           
+          <div id="Choice_{{ Load_Questions_Choices.0 }}" class="choice {%if Load_Questions_Choices.3 == True%}true{%else%}false{%endif%}"> 
+            <textarea id="choice_content_{{ Load_Questions_Choices.0 }}" class="choice_content" oninput="DisplaySaveButtonForChoice('{{ Load_Questions_Choices.0 }}')" >{{ Load_Questions_Choices.2 }}</textarea>
+            <div class="toggle-btn {%if Load_Questions_Choices.3 == True%}active{%endif%}" onclick="Change_Truth_Statement({{ Load_Questions_Choices.0 }})">
+              <input id="Choice_input_{{ Load_Questions_Choices.0 }}" type="checkbox" class="cb-value" {%if Load_Questions_Choices.3 == True%}checked{%endif%}/>
+              <span class="round-btn"></span>
+            </div>
+            <button id="choice_button_{{ Load_Questions_Choices.0 }}" class="save_buttons choice_submit" onclick="Change_Choice_Content('{{ Load_Questions_Choices.0 }}')"> <div class="save-text" >Save</div> <div class="custom-loader"></div> </button>
+            <div class="delete_choice" onclick="Delete_Choice({{ Load_Questions_Choices.0 }})"><i data-feather="minus-circle"></i></div>
+          </div>
+        
+         {% endif %}
+
+        {%endfor%}
+
+      </div>
+
+      <button id="question_button_{{ Load_Quizz_Questions.0 }}" class="save_buttons" onclick="Change_Question_Content('{{ Load_Quizz_Questions.0 }}')"> <div class="save-text" >Save</div> <div class="custom-loader"></div> </button>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+  </div>
+
+  <div id="customMenu">
+    <ul>
+        <li onclick="Open_New_Choice_Modal()" >Add choice</li>
+        <li style="color: red;" onclick="Delete_Question()">Delete</li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+
+  <div id="how-it-works-question" style="left: 20vh; top: 5vh; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); display: none; position: absolute; width: 200px; padding: 20px; background-color: white; z-index: 10000; border-radius: 10px; opacity: 1 !important;"><h5 class="tuto_title" >Questions:</h5> <p style="color: black;" id="defza">With this button you can create  new questions.</p><button class="next_buttons" onclick="next_1()">Next</button></div>
+
+</div>
+
+<div class="modal__container" id="modal-container">
+  
+  <div class="modal__content">
+
+    {% csrf_token %}
+
+    <div class="add_question_modal" >
+
+      <h1 class="modal__title" style="margin-bottom: 20px;">New Question</h1>
+
+      <textarea id="content_for_new_question"  class="modal__button modal__button-width" placeholder="e.g: Check the correct statements about the bony pelvis :"></textarea>
+
+      <button onclick="Create_New_Question()" class="modal__button modal__button-width_2" style="background-color: #007bff; color: white;  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); margin: 10px;">
+        Create
+      </button>
+
+      <button class="modal__button-link close-modal">
+          Close
+      </button>
+
+    </div>
+
+    <div class="help_modal" style="display: none;">  
+
+      <h1 class="modal__title" style="margin-bottom: 20px;">Tutorial</h1>
+
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae, rerum enim nam ex placeat minus dolorum repudiandae ratione? Excepturi aspernatur ipsa nemo quae fuga est neque odio quos laboriosam architecto.</p>
+    
+      <button class="modal__button-link close-modal">
+          Close
+      </button>
+
+    </div>
+
+    <div class="add_choice_modal">
+
+      <h1 class="modal__title" style="margin-bottom: 20px;">New Choice</h1>
+
+      <textarea id="content_for_new_choice"  class="modal__button modal__button-width" placeholder="e.g: The midplane is bounded anteriorly by the pubic symphysis."></textarea>
+
+      <button onclick="Create_New_Choice()" class="modal__button modal__button-width_2" style="background-color: #007bff; color: white;  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); margin: 10px;">
+        Create
+      </button>
+
+      <button class="modal__button-link close-modal">
+          Close
+      </button>
+
+    </div>
+
+    <div style="display: none;" class="modal_loader">
+      <div class="custom-loader-2"></div>
+    </div>
+
+    <div style="display: none;" class="uploader-modal">
+
+      <h1 class="modal__title" style="margin-bottom: 20px;">File to Quiz</h1>
+
+      <form id="uploadForm">
+
+      <div style="color: red; margin-bottom: 20px;" id="status"></div>
+
+      <input type="file" id="fileInput" name="file">
+
+      <button type="button" onclick="uploadFile()" class="modal__button modal__button-width_2" style="background-color: #007bff; color: white;  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); margin: 10px;">
+        Convert
+      </button>
+
+      </form>
+
+      <button class="modal__button-link close-modal">
+          Close
+      </button>
+
+    </div>
+
+    <div style="display: none;" class="settings-modal">
+
+      <h1 class="modal__title" style="margin-bottom: 20px;">Settings</h1>
+
+      <h3 style="text-align: left; margin-bottom: 10px;">Restrict access :</h3>
+    
+      <input id="inpLock" type="checkbox" onclick="Restrict_Quizz()"{% if Quizz_Access == True %}checked{%endif%}>
+      <label class="btn-lock" for="inpLock" style="margin-bottom: 10px;">
+          <svg width="36" height="40" style="margin-left: 7px;" viewBox="0 0 36 40">
+              <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
+              <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+              <path class="bling" d="M29 20L31 22"></path>
+              <path class="bling" d="M31.5 15H34.5"></path>
+              <path class="bling" d="M29 10L31 8"></path>
+          </svg>
+      </label>
+
+      <h3 style="text-align: left; margin-bottom: 10px;">Start over :</h3>
+
+      <button type="button" onclick="Reset_Quizz()" class="modal__button modal__button-width_2" style="background-color: grey; color: white;  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); margin: 10px;">
+        Reset
+      </button>
+
+      <h3 style="text-align: left; margin-bottom: 10px;">Delete Quiz :</h3>
+
+      <button type="button" onclick="Delete_Quizz()" class="modal__button modal__button-width_2" style="background-color: red; color: white;  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); margin: 10px;">
+        Delete
+      </button>
+
+      <button class="modal__button-link close-modal">
+          Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src='https://unpkg.com/feather-icons'></script>
+
+<script src="{% static 'js/editor.js' %}"></script>
+
+<script src="{% static 'js/update_title.js' %}"></script>
+
+<script src="{% static 'js/create_question.js' %}"></script>
+
+<script src="{% static 'js/update_question_content.js' %}"></script>
+
+<script src="{% static 'js/choice_modal.js' %}"></script>
+
+<script src="{% static 'js/create_choice.js' %}"></script>
+
+<script src="{% static 'js/update_choice_question.js' %}"></script>
+
+<script src="{% static 'js/update_choice_content.js' %}"></script>
+
+<script src="{% static 'js/delete_choice.js' %}"></script>
+
+<script src="{% static 'js/delete_question.js' %}"></script>
+
+<script src="{% static 'js/correct.js' %}"></script>
+
+<script src="{% static 'js/upload.js' %}"></script>
+
+<script src="{% static 'js/delete_quizz.js' %}"></script>
+
+<script src="{% static 'js/reset_quizz.js' %}"></script>
+
+<script src="{% static 'js/restrict_quizz.js' %}"></script>
+
+<script src="{% static 'js/math_expressions.js' %}"></script>
+
+<script src="{% static 'js/tutorial.js' %}"></script>
+
+<script>
+
+</script>
+
+</body>
+
+</html>

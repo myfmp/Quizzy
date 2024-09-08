@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from django.utils import timezone
+import cloudinary_storage
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

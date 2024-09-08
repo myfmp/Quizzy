@@ -2,12 +2,7 @@ django-cloudinary-storage==0.3.0
 cryptography==3.4.8
 django>=4.0,<5.0
 django-auth-style==0.8.1
-cryptography
-pillow
 psycopg2-binary
-lxml
-requests
-pyyaml
 django-environ
 django-compat==1.0.15
 django-allauth==64.2.1

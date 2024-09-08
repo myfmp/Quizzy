@@ -18,5 +18,3 @@ python3.9 manage.py collectstatic
 # Additional build steps (if any)
 # e.g., python manage.py migrate, etc.
 
-# Deactivate virtual environment (optional)
-deactivate

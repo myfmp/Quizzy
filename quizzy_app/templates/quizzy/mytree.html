@@ -79,7 +79,6 @@
     <div id="create-file">New File</div>
     <div id="rename-item">Rename</div>
     <div id="delete-item">Delete</div>
-    <div id="set-folder-password">Set Password</div>
 </div>
 
 <script>
@@ -365,15 +364,9 @@ function showContextMenu(x, y, hasSelectedItem) {
     if (hasSelectedItem) {
         $('#create-folder, #create-file').hide();
         $('#rename-item, #delete-item').show();
-        
-        if (selectedItem.type === 'folder') {
-            $('#set-folder-password').show();
-        } else {
-            $('#set-folder-password').hide();
-        }
     } else {
         $('#create-folder, #create-file').show();
-        $('#rename-item, #delete-item, #set-folder-password').hide();
+        $('#rename-item, #delete-item').hide();
     }
     
     setTimeout(hideContextMenu, 5000);
@@ -404,13 +397,7 @@ $('#delete-item').click(function() {
     hideContextMenu();
 });
 
-$('#set-folder-password').click(function() {
-    if (selectedItem && selectedItem.type === 'folder') {
-        const isProtected = selectedItem.element.data('protected') === 'true' || selectedItem.element.data('protected') === true;
-        openFolderPasswordModal(selectedItem.id, selectedItem.name, isProtected);
-    }
-    hideContextMenu();
-});
+
 
 function createNewFolder() {
     const folderName = prompt('Enter folder name:');

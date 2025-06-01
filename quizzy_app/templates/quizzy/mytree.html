@@ -244,18 +244,22 @@ function setupDragAndDrop() {
                     'X-CSRFToken': getCSRFToken()
                 },
                 success: function(response) {
-                    // Move the dragged item in the file system
-                    targetFolder.children[draggedItem.name] = currentFolder.children[draggedItem.name];
-                    delete currentFolder.children[draggedItem.name];
-                    renderFiles();
+                    // Check if draggedItem still exists before accessing its properties
+                    if (draggedItem && draggedItem.name) {
+                        // Move the dragged item in the file system
+                        targetFolder.children[draggedItem.name] = currentFolder.children[draggedItem.name];
+                        delete currentFolder.children[draggedItem.name];
+                        renderFiles();
+                    }
+                    $('.status_loader').css('display', 'none');
                 },
                 error: function() {
                     alert('Error moving item');
+                    $('.status_loader').css('display', 'none');
                 }
             });
 
             draggedItem = null;
-            $('.status_loader').css('display', 'none');
         }
     }
 

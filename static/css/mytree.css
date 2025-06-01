@@ -1,25 +1,14 @@
 .bank-manager-container{
-border: 1px solid var(--border-color);
+border: 1px solid gray;
 position: absolute;
 z-index: 3;
 margin-top: 10vh;
 margin-left: 10%;
 width: 80%;
 height: 80vh;
-background: var(--background-white);
-border-radius: var(--border-radius-lg);
-box-shadow: var(--shadow-lg);
-backdrop-filter: blur(10px);
-overflow: hidden;
-}
-.bank-manager-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+background-color: white;
+border-radius: 10px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 #file-explorer {
 z-index: 100;
@@ -46,21 +35,15 @@ height: 65vh;
 overflow-y: auto;
 }
 .file-item {
-padding: 12px 16px;
+padding: 8px;
 cursor: pointer;
 display: flex;
 align-items: center;
 user-select: none;
 position: relative;
-border-radius: var(--border-radius-sm);
-margin: 2px 8px;
-transition: var(--transition-base);
-border-left: 3px solid transparent;
 }
 .file-item:hover {
-background: linear-gradient(90deg, rgba(0, 123, 255, 0.05), rgba(0, 123, 255, 0.02));
-border-left-color: var(--primary-color);
-transform: translateX(4px);
+background-color: #f0f0f0;
 }
 .file-icon {
 margin-right: 10px;

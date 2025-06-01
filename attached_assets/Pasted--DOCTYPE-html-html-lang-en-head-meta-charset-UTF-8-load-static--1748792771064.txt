@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    {% load static %}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" href="{% static 'media/logo.ico' %}">
+    
+    <link rel="stylesheet" type="text/css" href="{% static 'css/quiz.css' %}">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <!-- KaTeX Auto-render extension -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+
+    <title>{{Quizz_Title}}</title>
+
+</head>
+
+<body>
+    
+{% csrf_token %}
+
+{% if Quizz_Access == True %}
+
+<div onclick="" id="format-btn" style="display: none; height: 50px; width: 50px; position: absolute; right: 10px; top: 20px; border-radius: 100%; background-color: #007bff; align-items: center; justify-content: center; color: white;">
+    <span><i data-feather="layers"></i></span>
+</div>
+
+<div class="container-blend" style="display: none;">
+
+    {% for Load_Quizz_Questions in Quizz_Questions %}
+
+    <div class="question-blend">
+
+        <h2 id="question_blend_{{ Load_Quizz_Questions.0 }}">{{Load_Quizz_Questions.2}}</h2>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+
+                 var text = `{{ Load_Quizz_Questions.2 }}`;
+                 var Text = text;
+
+                // Get the container where LaTeX will be rendered
+                const container = document.getElementById('question_blend_{{ Load_Quizz_Questions.0 }}');
+                
+                // LaTeX expression
+                const latex = Text;
+                
+                // Insert the LaTeX expression into the container
+                container.innerHTML = latex;
+                
+                // Render the LaTeX expression
+                renderMathInElement(container, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "$", right: "$", display: false}
+                    ]
+                });
+            });
+        </script>
+
+        {% for Load_Questions_Choices in Questions_Choices %}
+
+        {% if Load_Questions_Choices.1|floatformat:0 == Load_Quizz_Questions.0|floatformat:0 %}  
+
+        <div class="choices-blend">
+
+            <div class="choice-blend" id="question_answer_{{ Load_Questions_Choices.0 }}">
+
+                <label class="round-checkbox">
+                    
+                    <h4 id="choice_blend_{{ Load_Questions_Choices.0 }}">4</h4>
+                    <div class="input_to_answer_2">
+                    <input class="choice_answer" id="choice_answer_{{ Load_Questions_Choices.0 }}" type="checkbox" onclick="check_the_box_2('{{ Load_Questions_Choices.0 }}')">
+                    <span class="checkbox"></span>
+                    </div>
+
+                </label>
+
+            </div>  
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+
+                    var text = `{{ Load_Questions_Choices.2 }}`;
+                    var Text = text;
+
+                    // Get the container where LaTeX will be rendered
+                    const container = document.getElementById('choice_blend_{{ Load_Questions_Choices.0 }}');
+                    
+                    // LaTeX expression
+                    const latex = Text;
+                    
+                    // Insert the LaTeX expression into the container
+                    container.innerHTML = latex;
+                    
+                    // Render the LaTeX expression
+                    renderMathInElement(container, {
+                        delimiters: [
+                            {left: "$$", right: "$$", display: true},
+                            {left: "$", right: "$", display: false}
+                        ]
+                    });
+                });
+            </script>
+
+        </div>
+
+        {% endif %}
+
+        {%endfor%}
+
+    </div>
+
+    {%endfor%}
+
+    <button id="submitBtn_blend" class="nav-btn_blend secondarysubmit" onclick="Submit_1()">Submit</button>
+
+</div>
+
+
+<div class="container">
+
+    <div id="welcomePage">
+        <h1 style="color: #007bff;" >{{Quizz_Title}}</h1>
+        <button id="startBtn" class="nav-btn">Start</button>
+    </div>
+
+    {% for Load_Quizz_Questions in Quizz_Questions %}
+
+    <div class="nav-div" id="div{{ Load_Quizz_Questions.1 }}">
+
+        <div class="question">
+
+         <h2 id="question_{{ Load_Quizz_Questions.0 }}"></h2>
+
+         <script>
+            document.addEventListener("DOMContentLoaded", function() {
+
+                 var text = `{{ Load_Quizz_Questions.2 }}`;
+                 var Text = text;
+
+                // Get the container where LaTeX will be rendered
+                const container = document.getElementById('question_{{ Load_Quizz_Questions.0 }}');
+                
+                // LaTeX expression
+                const latex = Text;
+                
+                // Insert the LaTeX expression into the container
+                container.innerHTML = latex;
+                
+                // Render the LaTeX expression
+                renderMathInElement(container, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "$", right: "$", display: false}
+                    ]
+                });
+            });
+        </script>
+
+        </div>
+
+        <div class="choices-container" id="question_answer_2_{{ Load_Quizz_Questions.0 }}" style="text-align: center; overflow: auto;"> 
+
+            {% for Load_Questions_Choices in Questions_Choices %}
+
+            {% if Load_Questions_Choices.1|floatformat:0 == Load_Quizz_Questions.0|floatformat:0 %}  
+
+            <div class="choice" id="choice_wrap_{{ Load_Questions_Choices.0 }}">
+
+                <label class="round-checkbox">
+                    
+                    <h4 id="choice_{{ Load_Questions_Choices.0 }}"></h4>
+                    <div class="input_to_answer">
+                    <input type="checkbox" class="choice_answer_2" id="input_to_check_{{ Load_Questions_Choices.0 }}" onclick="check_the_box('{{ Load_Questions_Choices.0 }}')" data-answer="{{ Load_Questions_Choices.3 }}">
+                    <span class="checkbox" id="checkbox_span_{{ Load_Questions_Choices.0 }}"></span>
+                    </div>
+
+                </label>
+
+            </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+
+                    var text = `{{ Load_Questions_Choices.2 }}`;
+                    var Text = text;
+
+                    // Get the container where LaTeX will be rendered
+                    const container = document.getElementById('choice_{{ Load_Questions_Choices.0 }}');
+                    
+                    // LaTeX expression
+                    const latex = Text;
+                    
+                    // Insert the LaTeX expression into the container
+                    container.innerHTML = latex;
+                    
+                    // Render the LaTeX expression
+                    renderMathInElement(container, {
+                        delimiters: [
+                            {left: "$$", right: "$$", display: true},
+                            {left: "$", right: "$", display: false}
+                        ]
+                    });
+                });
+            </script>
+
+            {% endif %}
+
+            {%endfor%}
+            
+        </div>
+
+    </div>
+
+    {%endfor%}
+
+</div>
+
+<div class="buttons">
+    <button id="prevBtn" class="nav-btn">Previous</button>
+    <button id="nextBtn" class="nav-btn">Next</button>
+    <button id="submitBtn" class="nav-btn" onclick="Submit_1()">Submit</button>
+</div>
+
+<div class="modal__container" id="modal-container">
+  
+  <div class="modal__content">
+
+    {% csrf_token %}
+
+    <div style="display: none;" class="modal_loader">
+      <div class="custom-loader-2"></div>
+    </div>
+
+  </div>
+
+</div>
+
+{% else %}
+
+<form id="passwordForm" style="display: block; margin: auto; width: 200px; height: 200px; margin-top: 40vh;" method="GET" action="">
+    <h2 style="color: #007bff;">Password :</h2>
+    <input type="hidden" name="session" value="{{Quiz_id}}" required>
+    <input name="password" style="margin-bottom: 20px; height: 10px; border-radius: 7px; border: solid black 0.2px; padding: 10px;" type="password" required>
+    <button type="submit" class="nav-btn">Enter</button>
+</form>
+
+
+{% endif %}
+
+<script src='https://unpkg.com/feather-icons'></script>
+
+<script src="{% static 'js/quiz.js' %}"></script>
+
+<script src="{% static 'js/answer.js' %}"></script>
+
+</body>
+</html>

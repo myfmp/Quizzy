@@ -1,0 +1,218 @@
+   <script>
+
+      $(document).ready(function() {
+
+          function getCSRFToken() {
+              var csrfToken = null;
+              document.cookie.split(';').forEach(function(cookie) {
+                  var parts = cookie.split('=');
+                  if (parts[0].trim() == 'csrftoken') {
+                  csrfToken = parts[1].trim();
+                  }
+              });
+              return csrfToken;
+          }
+
+          const fileSystem = {{ Tree_JSON|safe }};
+
+          let currentPath = '/';
+          let navigationHistory = ['/'];
+          let currentHistoryIndex = 0;
+          let draggedItem = null;
+          let selectedItem = null;
+          let contextMenuTimeout;
+
+          function renderFiles() {
+              const $fileList = $('#file-list');
+              $fileList.empty();
+
+              const currentFolder = getCurrentFolder();
+              Object.keys(currentFolder.children).forEach(name => {
+                  const item = currentFolder.children[name];
+                  const $item = $(`
+                      <div class="file-item" 
+                              data-id="${item.id}"
+                              data-name="${name}" 
+                              data-type="${item.type}"
+                              ${item.locked ? 'data-locked="true"' : ''}
+                              draggable="true">
+                          <span class="file-icon">${item.type === 'folder' ? '📁' : '📄'}</span>
+                          <span class="file-name" ${item.locked ? 'style="color:red;"' : ''}>${item.type === 'folder' ? name : `<a target="_blank" href=https://www.quizzilo.com/bridge?id=${item.id}>${name}</a>`}</span>
+                      </div>
+                  `);
+                  $fileList.append($item);
+              });
+
+              setupDragAndDrop();
+              updatePathBar();
+              updateNavigationButtons();
+              setupContextMenu();
+          }
+
+function setupDragAndDrop() {
+    let draggedItem = null;
+    let touchStartElement = null;
+    let isDragging = false;
+
+    // Common function to handle drag start
+    function handleDragStart(element) {
+        draggedItem = {
+            id: $(element).data('id'),
+            name: $(element).data('name'),
+            type: $(element).data('type')
+        };
+        isDragging = true;
+    }
+
+    // Common function to handle drag over
+    function handleDragOver(element) {
+        const targetType = $(element).data('type');
+        if (targetType === 'folder') {
+            $(element).addClass('drag-over');
+        }
+    }
+
+    // Common function to handle drag leave
+    function handleDragLeave(element) {
+        $(element).removeClass('drag-over');
+    }
+
+    // Common function to handle drop
+    function handleDrop(element) {
+        $(element).removeClass('drag-over');
+
+        const targetId = $(element).data('id');
+        const targetName = $(element).data('name');
+        const targetType = $(element).data('type');
+
+        // Prevent dragging a folder into itself
+        if (draggedItem && draggedItem.id === targetId) {
+            console.log("Cannot drag a folder into itself.");
+            return; // Exit the function early
+        }
+
+        // Only allow dropping into folders
+        if (targetType === 'folder' && draggedItem) {
+            const currentFolder = getCurrentFolder();
+            const targetFolder = currentFolder.children[targetName];
+
+            $('.status_loader').css('display', 'block');
+
+            if (draggedItem.type === 'folder') {
+                $.ajax({
+                    url: window.location.href,
+                    method: "POST",
+                    data: { New_parent: targetId, Folder_draged_id: draggedItem.id, isFile: "0" },
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                });
+            } else {
+                $.ajax({
+                    url: window.location.href,
+                    method: "POST",
+                    data: { New_parent: targetId, Folder_draged_id: draggedItem.id, isFile: "1" },
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                });
+            }
+
+            // Move the dragged item
+            targetFolder.children[draggedItem.name] = currentFolder.children[draggedItem.name];
+
+            // Remove from original location
+            delete currentFolder.children[draggedItem.name];
+
+            renderFiles();
+            draggedItem = null;
+            $('.status_loader').css('display', 'none');
+        }
+    }
+
+    // Desktop events
+    $('.file-item').on('dragstart', function(e) {
+        handleDragStart(this);
+        e.originalEvent.dataTransfer.setData('text/plain', '');
+    });
+
+    $('.file-item').on('dragover', function(e) {
+        e.preventDefault();
+        handleDragOver(this);
+    });
+
+    $('.file-item').on('dragleave', function() {
+        handleDragLeave(this);
+    });
+
+    $('.file-item').on('drop', function(e) {
+        e.preventDefault();
+        handleDrop(this);
+    });
+
+    // Mobile touch events
+    $('.file-item').on('touchstart', function(e) {
+        touchStartElement = this;
+        handleDragStart(this);
+    });
+
+    $('.file-item').on('touchmove', function(e) {
+        if (isDragging && touchStartElement) {
+            e.preventDefault(); // Prevent scrolling while dragging
+            const touch = e.originalEvent.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            // Remove drag-over class from all elements
+            $('.file-item').removeClass('drag-over');
+
+            // Add drag-over class to the element under the touch point
+            if (element && $(element).hasClass('file-item')) {
+                handleDragOver(element);
+            }
+        }
+    });
+
+    $('.file-item').on('touchend', function(e) {
+        if (isDragging && touchStartElement) {
+            const touch = e.originalEvent.changedTouches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            if (element && $(element).hasClass('file-item')) {
+                handleDrop(element);
+            }
+
+            // Clean up
+            $('.file-item').removeClass('drag-over');
+            isDragging = false;
+            touchStartElement = null;
+            draggedItem = null;
+        }
+    });
+
+    $('.file-item').on('touchcancel', function() {
+        if (isDragging) {
+            $('.file-item').removeClass('drag-over');
+            isDragging = false;
+            touchStartElement = null;
+            draggedItem = null;
+        }
+    });
+}
+
+          function getCurrentFolder() {
+              let folder = fileSystem['/'];
+              const pathParts = currentPath.split('/').filter(p => p);
+
+              for (let part of pathParts) {
+                  folder = folder.children[part];
+              }
+              return folder;
+          }
+
+          function updatePathBar() {
+              $('#path-bar').text(currentPath);
+          }
+
+          function updateNavigationButtons() {
+              $('#back-btn').prop('disabled', currentHistoryIndex <= 0);
+              $('#forward-btn').prop('

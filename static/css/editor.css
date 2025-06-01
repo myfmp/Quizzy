@@ -1133,10 +1133,14 @@ margin-bottom: 2rem;
 
 #quizz_header {
 position: sticky;
-padding: 20px;
-background-color: white;
-box-shadow: #6a778e;    
-border-radius: 10px;
+top: 0;
+padding: 24px;
+background: linear-gradient(135deg, var(--background-white) 0%, var(--background-light) 100%);
+box-shadow: var(--shadow-md);
+border-radius: var(--border-radius-lg);
+border: 1px solid var(--border-color);
+z-index: 100;
+backdrop-filter: blur(10px);
 }
 
 #quizz_title{
@@ -1195,12 +1199,30 @@ animation:s1 1s infinite;
     max-height: calc(100vh - 300px);
 }
 .Question {
-    padding: 20px;
-    margin: 5px 0;
-    margin-bottom: 50px;
-    background-color: white;
-    border-radius: 10px;
+    padding: 24px;
+    margin: 16px 0;
+    margin-bottom: 32px;
+    background: var(--background-white);
+    border-radius: var(--border-radius-lg);
     cursor: move;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: var(--transition-base);
+    position: relative;
+}
+.Question::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+.Question:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 .question_content{

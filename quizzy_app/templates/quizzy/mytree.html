@@ -230,6 +230,13 @@ function setupDragAndDrop() {
             const currentFolder = getCurrentFolder();
             const targetFolder = currentFolder.children[targetName];
 
+            // Store draggedItem data before AJAX call since it might be cleared
+            const itemToMove = {
+                id: draggedItem.id,
+                name: draggedItem.name,
+                type: draggedItem.type
+            };
+
             $('.status_loader').css('display', 'block');
 
             $.ajax({
@@ -237,20 +244,17 @@ function setupDragAndDrop() {
                 method: "POST",
                 data: { 
                     New_parent: targetId, 
-                    Folder_draged_id: draggedItem.id, 
-                    isFile: draggedItem.type === 'file' ? "1" : "0" 
+                    Folder_draged_id: itemToMove.id, 
+                    isFile: itemToMove.type === 'file' ? "1" : "0" 
                 },
                 headers: {
                     'X-CSRFToken': getCSRFToken()
                 },
                 success: function(response) {
-                    // Check if draggedItem still exists before accessing its properties
-                    if (draggedItem && draggedItem.name) {
-                        // Move the dragged item in the file system
-                        targetFolder.children[draggedItem.name] = currentFolder.children[draggedItem.name];
-                        delete currentFolder.children[draggedItem.name];
-                        renderFiles();
-                    }
+                    // Move the dragged item in the file system using stored data
+                    targetFolder.children[itemToMove.name] = currentFolder.children[itemToMove.name];
+                    delete currentFolder.children[itemToMove.name];
+                    renderFiles();
                     $('.status_loader').css('display', 'none');
                 },
                 error: function() {

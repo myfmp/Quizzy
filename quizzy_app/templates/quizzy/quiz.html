@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="icon" type="image/png" href="{% static 'media/logo.ico' %}">
-    
+
     <link rel="stylesheet" type="text/css" href="{% static 'css/quiz.css' %}">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
@@ -28,7 +28,7 @@
 </head>
 
 <body>
-    
+
 {% csrf_token %}
 
 {% if Quizz_Access == True %}
@@ -53,13 +53,13 @@
 
                 // Get the container where LaTeX will be rendered
                 const container = document.getElementById('question_blend_{{ Load_Quizz_Questions.0 }}');
-                
+
                 // LaTeX expression
                 const latex = Text;
-                
+
                 // Insert the LaTeX expression into the container
                 container.innerHTML = latex;
-                
+
                 // Render the LaTeX expression
                 renderMathInElement(container, {
                     delimiters: [
@@ -79,7 +79,7 @@
             <div class="choice-blend" id="question_answer_{{ Load_Questions_Choices.0 }}">
 
                 <label class="round-checkbox">
-                    
+
                     <h4 id="choice_blend_{{ Load_Questions_Choices.0 }}">4</h4>
                     <div class="input_to_answer_2">
                     <input class="choice_answer" id="choice_answer_{{ Load_Questions_Choices.0 }}" type="checkbox" onclick="check_the_box_2('{{ Load_Questions_Choices.0 }}')">
@@ -98,13 +98,13 @@
 
                     // Get the container where LaTeX will be rendered
                     const container = document.getElementById('choice_blend_{{ Load_Questions_Choices.0 }}');
-                    
+
                     // LaTeX expression
                     const latex = Text;
-                    
+
                     // Insert the LaTeX expression into the container
                     container.innerHTML = latex;
-                    
+
                     // Render the LaTeX expression
                     renderMathInElement(container, {
                         delimiters: [
@@ -153,13 +153,13 @@
 
                 // Get the container where LaTeX will be rendered
                 const container = document.getElementById('question_{{ Load_Quizz_Questions.0 }}');
-                
+
                 // LaTeX expression
                 const latex = Text;
-                
+
                 // Insert the LaTeX expression into the container
                 container.innerHTML = latex;
-                
+
                 // Render the LaTeX expression
                 renderMathInElement(container, {
                     delimiters: [
@@ -181,7 +181,7 @@
             <div class="choice" id="choice_wrap_{{ Load_Questions_Choices.0 }}">
 
                 <label class="round-checkbox">
-                    
+
                     <h4 id="choice_{{ Load_Questions_Choices.0 }}"></h4>
                     <div class="input_to_answer">
                     <input type="checkbox" class="choice_answer_2" id="input_to_check_{{ Load_Questions_Choices.0 }}" onclick="check_the_box('{{ Load_Questions_Choices.0 }}')" data-answer="{{ Load_Questions_Choices.3 }}">
@@ -200,13 +200,13 @@
 
                     // Get the container where LaTeX will be rendered
                     const container = document.getElementById('choice_{{ Load_Questions_Choices.0 }}');
-                    
+
                     // LaTeX expression
                     const latex = Text;
-                    
+
                     // Insert the LaTeX expression into the container
                     container.innerHTML = latex;
-                    
+
                     // Render the LaTeX expression
                     renderMathInElement(container, {
                         delimiters: [
@@ -220,7 +220,7 @@
             {% endif %}
 
             {%endfor%}
-            
+
         </div>
 
     </div>
@@ -236,7 +236,7 @@
 </div>
 
 <div class="modal__container" id="modal-container">
-  
+
   <div class="modal__content">
 
     {% csrf_token %}

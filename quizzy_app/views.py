@@ -940,6 +940,22 @@ def quiz(request):
           else:
               quizz_access = False
 
+     # Handle POST requests for quiz password
+     if request.method == 'POST':
+         from .manager import restrict_quizz, unlock_quizz
+         from .encryptor import encrypt_data
+
+         Quizz_Password = request.POST.get('Quizz_Password')
+         Quizz_Unlocked = request.POST.get('Quizz_Unlocked')
+
+         if Quizz_Password:
+             encrypted_password = encrypt_data(Quizz_Password)
+             restrict_quizz(encrypted_password, Actual_Quizz_id)
+             return JsonResponse({'DATA': 'PASSWORD_SET'})
+         elif Quizz_Unlocked:
+             unlock_quizz(Actual_Quizz_id)
+             return JsonResponse({'DATA': 'PASSWORD_REMOVED'})
+
      #loading the questions
      Get_Quizz_Questions = Question.objects.filter(Quizz_id=Actual_Quizz_id).annotate(order_as_int=Cast('Order', IntegerField())).order_by('order_as_int')
      Quizz_Questions = []

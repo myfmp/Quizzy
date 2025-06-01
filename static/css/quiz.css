@@ -227,3 +227,118 @@ transform: translate(-50%, -50%);
 }
 
 @keyframes s2 {to{transform: rotate(.5turn)}}
+
+/* Lock button styles */
+#inpLock {
+    display: none;
+}
+
+.btn-lock {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.btn-lock:hover {
+    opacity: 0.8;
+}
+
+.btn-lock svg {
+    transition: transform 0.3s ease;
+}
+
+.btn-lock:hover svg {
+    transform: scale(1.05);
+}
+
+/* Lock SVG path styles */
+.btn-lock .lockb {
+    fill: #525252;
+    transition: fill 0.3s ease;
+}
+
+.btn-lock .lock {
+    stroke: #525252;
+    stroke-width: 2;
+    fill: none;
+    transition: stroke 0.3s ease;
+}
+
+.btn-lock .bling {
+    stroke: #525252;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    transition: stroke 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+
+/* Checked state styles */
+#inpLock:checked + .btn-lock .lockb {
+    fill: #007bff;
+}
+
+#inpLock:checked + .btn-lock .lock {
+    stroke: #007bff;
+}
+
+#inpLock:checked + .btn-lock .bling {
+    stroke: #ffd700;
+    opacity: 1;
+}
+
+/* Lock animation */
+#inpLock:checked + .btn-lock svg {
+    animation: lockShake 0.6s ease-in-out;
+}
+
+@keyframes lockShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* Modal styles */
+.modal__container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal__content {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal__title {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal__button-link {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 14px;
+    margin-top: 15px;
+    display: block;
+    text-align: center;
+}
+
+.modal__button-link:hover {
+    color: #0056b3;
+}

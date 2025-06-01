@@ -1110,6 +1110,81 @@ function renameItem() {
     border-radius: 5px;
     cursor: pointer;
 }
+
+.btn-cancel:hover {
+  background-color: #545b62;
+}
+
+.btn-lock {
+  --stroke: #7C3AED;
+  display: block;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.btn-lock svg {
+  display: block;
+  transition: .3s;
+  transform-origin: center center;
+}
+
+.btn-lock svg .lock {
+  fill: none;
+  stroke: var(--stroke);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: .3s;
+  stroke-dasharray: 24px;
+}
+
+.btn-lock svg .lockb {
+  fill: var(--stroke);
+  transition: .3s;
+}
+
+.btn-lock svg .bling {
+  fill: none;
+  stroke: var(--stroke);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 4px;
+  animation: bling .8s linear infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.btn-lock input[type=checkbox] {
+  display: none;
+}
+
+.btn-lock input[type=checkbox]:checked + label svg {
+  transform: scale(.88);
+}
+
+.btn-lock input[type=checkbox]:checked + label svg .lock {
+  stroke-dasharray: 48px;
+}
+
+.btn-lock input[type=checkbox]:checked + label svg .bling {
+  animation-delay: .11s;
+  opacity: 1;
+}
+
+@keyframes bling {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 </style>
 
     <section class="row">
@@ -1253,6 +1328,28 @@ function renameItem() {
             </div>
           </label>
         </div>
+      </div>
+
+          <!-- Lock Option -->
+      <div class="sharing-section">
+        <h3>Password Protection</h3>
+        <label class="btn-lock">
+          <input type="checkbox" id="lock-share-link">
+          <label for="lock-share-link">
+            <svg viewBox="0 0 32 32" height="32" width="32">
+              <defs>
+                <linearGradient gradientTransform="rotate(45)" id="gradient">
+                  <stop stop-color="#7C3AED" offset="30%"></stop>
+                  <stop stop-color="#DB2777" offset="90%"></stop>
+                </linearGradient>
+              </defs>
+              <path class="bling" d="M28.94,12.39a1.5,1.5,0,0,0-1.88-1.88L22.73,15.88a1.5,1.5,0,0,0,1.88,1.88Z" transform="translate(-1 -1)"></path>
+              <path class="bling" d="M9.17,12.39A1.5,1.5,0,0,1,7.29,10.51L14,3.82A1.5,1.5,0,0,1,15.88,5.71Z" transform="translate(-1 -1)"></path>
+              <path class="lock" d="M23,12V9a7,7,0,0,0-14,0v3"></path>
+              <rect class="lockb" x="5" y="12" width="14" height="14" rx="3" ry="3"></rect>
+            </svg>
+          </label>
+        </label>
       </div>
 
       <div class="sharing-section">

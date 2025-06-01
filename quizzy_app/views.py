@@ -112,6 +112,26 @@ def mytree(request):
             'error': 'Invalid password'
         })
 
+    # Check if share link is protected (for shared links from dashboard)
+    share_password = request.session.get(f'share_password_{Actual_Tree_id}')
+    if share_password and not password:
+        return render(request, "quizzy/mytree_password.html", {
+            'session': Encrypted_Tree_id,
+            'path': path,
+            'folderId': folderId,
+            'allowEdit': allowEdit,
+            'is_share_lock': True
+        })
+    elif share_password and password != share_password:
+        return render(request, "quizzy/mytree_password.html", {
+            'session': Encrypted_Tree_id,
+            'path': path,
+            'folderId': folderId,
+            'allowEdit': allowEdit,
+            'error': 'Invalid password',
+            'is_share_lock': True
+        })
+
     # Check if invite link is protected (only when not in edit mode)
     if not allowEdit:
         invite_password = request.session.get(f'invite_password_{Actual_Tree_id}')
@@ -559,6 +579,18 @@ def dashboard(request):
         Active = False
 
     if request.method == 'POST':
+
+        # Share password handling
+        share_password = request.POST.get('share_password')
+        remove_share_password = request.POST.get('remove_share_password')
+
+        if share_password:
+            request.session[f'share_password_{request.user.id}'] = share_password
+            return JsonResponse({'status': 'share_password_set'})
+        elif remove_share_password:
+            if f'share_password_{request.user.id}' in request.session:
+                del request.session[f'share_password_{request.user.id}']
+            return JsonResponse({'status': 'share_password_removed'})
 
         New_Folder_Name_Post = request.POST.get('Folder_Name')
         New_Folder_Parent_Post = request.POST.get('Parent_Id')

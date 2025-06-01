@@ -98,6 +98,36 @@ border-radius: 3px;
 font-size: 0.9em;
 }
 
+/* Invite lock button styles */
+#invite-lock-btn {
+background: none;
+border: none;
+cursor: pointer;
+padding: 0;
+margin: 10px;
+}
+
+.btn-lock {
+display: inline-block;
+cursor: pointer;
+}
+
+#inviteLock {
+display: none;
+}
+
+.btn-lock svg {
+transition: all 0.3s ease;
+}
+
+#inviteLock:checked + .btn-lock svg .lock {
+stroke: #27ae60;
+}
+
+#inviteLock:checked + .btn-lock svg .lockb {
+fill: #27ae60;
+}
+
 #context-menu {
 position: fixed;
 background-color: white;

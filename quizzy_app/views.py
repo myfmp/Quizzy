@@ -112,6 +112,27 @@ def mytree(request):
             'error': 'Invalid password'
         })
 
+    # Check if invite link is protected (only when not in edit mode)
+    if not allowEdit:
+        invite_password = request.session.get(f'invite_password_{Actual_Tree_id}')
+        if invite_password and not password:
+            return render(request, "quizzy/mytree_password.html", {
+                'session': Encrypted_Tree_id,
+                'path': path,
+                'folderId': folderId,
+                'allowEdit': allowEdit,
+                'is_invite_lock': True
+            })
+        elif invite_password and password != invite_password:
+            return render(request, "quizzy/mytree_password.html", {
+                'session': Encrypted_Tree_id,
+                'path': path,
+                'folderId': folderId,
+                'allowEdit': allowEdit,
+                'error': 'Invalid password',
+                'is_invite_lock': True
+            })
+
     # Fetch quizzes owned by the user
     User_Quizs = Quizz.objects.filter(Owner_id=Actual_Tree_id)
     User_Folders = Folders.objects.filter(Owner_id=Actual_Tree_id)
@@ -249,6 +270,8 @@ def mytree(request):
         folder_password = request.POST.get('folder_password')
         unlock_folder = request.POST.get('unlock_folder')
         folder_id = request.POST.get('folder_id')
+        invite_password = request.POST.get('invite_password')
+        remove_invite_lock = request.POST.get('remove_invite_lock')
 
         # File/Folder management requests
         New_Folder_Name_Post = request.POST.get('Folder_Name')
@@ -334,6 +357,13 @@ def mytree(request):
             if f'tree_password_{Actual_Tree_id}' in request.session:
                 del request.session[f'tree_password_{Actual_Tree_id}']
             return JsonResponse({'status': 'password_removed'})
+        elif invite_password:
+            request.session[f'invite_password_{Actual_Tree_id}'] = invite_password
+            return JsonResponse({'status': 'invite_locked'})
+        elif remove_invite_lock:
+            if f'invite_password_{Actual_Tree_id}' in request.session:
+                del request.session[f'invite_password_{Actual_Tree_id}']
+            return JsonResponse({'status': 'invite_unlocked'})
 
         # Handle file/folder operations
         if New_Folder_Name_Post and New_Folder_Parent_Post:
@@ -385,7 +415,8 @@ def mytree(request):
         'path': path,
         'folderId': folderId,
         'allowEdit': allowEdit,
-        'has_password': f'tree_password_{Actual_Tree_id}' in request.session
+        'has_password': f'tree_password_{Actual_Tree_id}' in request.session,
+        'invite_locked': f'invite_password_{Actual_Tree_id}' in request.session
     })
 
 

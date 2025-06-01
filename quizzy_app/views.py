@@ -241,19 +241,92 @@ def mytree(request):
 
     Tree = get_full_file_system(Actual_Tree_id)
 
-    # Handle password protection requests
+    # Handle all POST requests
     if request.method == 'POST':
+        # Password protection requests
         set_password = request.POST.get('set_password')
         remove_password = request.POST.get('remove_password')
-        folder_id = request.POST.get('folder_id')  # Get the folder ID
+        folder_password = request.POST.get('folder_password')
+        unlock_folder = request.POST.get('unlock_folder')
+        folder_id = request.POST.get('folder_id')
 
-        if set_password and folder_id:
-            request.session[f'folder_password_{folder_id}'] = set_password
-            return JsonResponse({'status': 'password_set'})
-        elif remove_password and folder_id:
+        # File/Folder management requests
+        New_Folder_Name_Post = request.POST.get('Folder_Name')
+        New_Folder_Parent_Post = request.POST.get('Parent_Id')
+        New_new_Folder_Name_Post = request.POST.get('Folder_New_Name')
+        New_new_Folder_Id = request.POST.get('Folder_to_change_id')
+        New_parent_of_draged_folder_id = request.POST.get('New_parent')
+        Folder_draged_id = request.POST.get('Folder_draged_id')
+        File_or_Folder = request.POST.get('isFile')
+        New_Quizz_Title = request.POST.get('New_Quizz_Title')
+        Parent_Quizz_Folder = request.POST.get('Parent_Quizz_Folder')
+        Folder_To_Delete_ID = request.POST.get('Folder_to_Delete')
+
+        def delete_folder(Folder_To_Delete_Id):
+            InFolder_Folders = Folders.objects.filter(Parent_folder_id=Folder_To_Delete_Id) 
+            InFolder_Folders.delete()
+            InFolder_Quizzs = Quizz.objects.filter(Parent_folder_id=Folder_To_Delete_Id) 
+            InFolder_Quizzs.delete()
+            Actual_Folder = Folders.objects.get(id=int(Folder_To_Delete_Id))
+            Actual_Folder.delete()
+
+        def update_folder_parent(Draged_Folder_Id, New_parent_id, FileOrFolder):
+            if str(FileOrFolder) == "0":
+                new_folder_parent = Folders.objects.get(id=Draged_Folder_Id)
+                new_folder_parent.Parent_folder_id = New_parent_id
+                new_folder_parent.save()
+            else:
+                new_quiz_parent = Quizz.objects.get(id=Draged_Folder_Id)
+                new_quiz_parent.Parent_folder_id = New_parent_id
+                new_quiz_parent.save()
+
+        def rename_folder(Folder_Id, Folder_New_Name):
+            new_folder_name = Folders.objects.get(id=Folder_Id)
+            new_folder_name.Folder_Name = Folder_New_Name
+            new_folder_name.save()
+
+        def rename_quiz(Quiz_Id, Quiz_New_Name):
+            quiz = Quizz.objects.get(id=Quiz_Id)
+            quiz.Title = Quiz_New_Name
+            quiz.save()
+
+        def create_folder(New_Folder_Name, New_Folder_Parent):
+            new_folder = Folders(
+                Owner_id=Actual_Tree_id,
+                Folder_Name=New_Folder_Name,
+                Parent_folder_id=New_Folder_Parent
+            )
+            new_folder.save()
+            return new_folder.id
+
+        def create_quiz(Quiz_Title, Parent_Folder):
+            new_quizz = Quizz(
+                Owner_id=Actual_Tree_id,
+                Title=Quiz_Title,
+                Parent_folder_id=Parent_Folder,
+                Settings=['EMPTY']
+            )
+            new_quizz.save()
+
+            # Create a default question for the new quiz
+            default_question = Question(
+                Quizz_id=str(new_quizz.id),
+                Content='Enter your first question ...',
+                Scoring='1',
+                Order='1'
+            )
+            default_question.save()
+
+            return new_quizz.id
+
+        # Handle password protection
+        if folder_password and folder_id:
+            request.session[f'folder_password_{folder_id}'] = folder_password
+            return JsonResponse({'status': 'folder_password_set'})
+        elif unlock_folder and folder_id:
             if f'folder_password_{folder_id}' in request.session:
                 del request.session[f'folder_password_{folder_id}']
-            return JsonResponse({'status': 'password_removed'})
+            return JsonResponse({'status': 'folder_unlocked'})
         elif set_password:
             request.session[f'tree_password_{Actual_Tree_id}'] = set_password
             return JsonResponse({'status': 'password_set'})
@@ -261,6 +334,51 @@ def mytree(request):
             if f'tree_password_{Actual_Tree_id}' in request.session:
                 del request.session[f'tree_password_{Actual_Tree_id}']
             return JsonResponse({'status': 'password_removed'})
+
+        # Handle file/folder operations
+        if New_Folder_Name_Post and New_Folder_Parent_Post:
+            folder_id = create_folder(New_Folder_Name_Post, New_Folder_Parent_Post)
+            return JsonResponse({'New_Folder': str(folder_id)})
+
+        if New_new_Folder_Name_Post and New_new_Folder_Id:
+            try:
+                # Check if it's a folder or quiz
+                if Folders.objects.filter(id=New_new_Folder_Id).exists():
+                    rename_folder(New_new_Folder_Id, New_new_Folder_Name_Post)
+                elif Quizz.objects.filter(id=New_new_Folder_Id).exists():
+                    rename_quiz(New_new_Folder_Id, New_new_Folder_Name_Post)
+                return JsonResponse({'status': 'renamed'})
+            except:
+                return JsonResponse({'status': 'error'})
+
+        if New_parent_of_draged_folder_id and Folder_draged_id and File_or_Folder:
+            try:
+                update_folder_parent(Folder_draged_id, New_parent_of_draged_folder_id, File_or_Folder)
+                return JsonResponse({'status': 'moved'})
+            except:
+                return JsonResponse({'status': 'error'})
+
+        if Folder_To_Delete_ID:
+            try:
+                # Check if it's a folder or quiz
+                if Folders.objects.filter(id=Folder_To_Delete_ID).exists():
+                    delete_folder(Folder_To_Delete_ID)
+                elif Quizz.objects.filter(id=Folder_To_Delete_ID).exists():
+                    quiz_to_delete = Quizz.objects.get(id=Folder_To_Delete_ID)
+                    # Delete associated questions and choices
+                    Question.objects.filter(Quizz_id=Folder_To_Delete_ID).delete()
+                    Choice.objects.filter(Quizz_id=Folder_To_Delete_ID).delete()
+                    quiz_to_delete.delete()
+                return JsonResponse({'status': 'deleted'})
+            except:
+                return JsonResponse({'status': 'error'})
+
+        if New_Quizz_Title and Parent_Quizz_Folder:
+            try:
+                quiz_id = create_quiz(New_Quizz_Title, Parent_Quizz_Folder)
+                return JsonResponse({'ID': str(quiz_id)})
+            except:
+                return JsonResponse({'status': 'error'})
 
     return render(request, "quizzy/mytree.html", {
         'Tree_JSON': json.dumps(Tree),

@@ -690,7 +690,8 @@ def dashboard(request):
         'Quiz': Quizs,
         'Active': Active,
         'Tree_Key': tree_session_key,
-        'Tree_JSON': json.dumps(Tree)
+        'Tree_JSON': json.dumps(Tree),
+        'has_share_password': f'share_password_{request.user.id}' in request.session
     })
 
 def pricing(request):

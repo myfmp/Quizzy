@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en" >
 
 <head>
   <meta charset="UTF-8">
-  
+
   {% load static %}
 
   <title>Quizzilo - Dashboard</title>
@@ -188,7 +187,7 @@ function renderFiles() {
         setupDragAndDrop();
         setupContextMenu();
     }
-    
+
     updatePathBar();
     updateNavigationButtons();
 }
@@ -196,7 +195,7 @@ function renderFiles() {
 function getCurrentFolder() {
     let folder = fileSystem['/'];
     const pathParts = currentPath.split('/').filter(p => p);
-    
+
     for (let part of pathParts) {
         folder = folder.children[part];
     }
@@ -366,7 +365,7 @@ function setupContextMenu() {
     $('#file-explorer').off('contextmenu').on('contextmenu', function(e) {
         e.preventDefault();
         const $target = $(e.target).closest('.file-item');
-        
+
         if ($target.length) {
             selectedItem = {
                 id: $target.data('id'),
@@ -389,7 +388,7 @@ function setupContextMenu() {
 function showContextMenu(x, y, hasSelectedItem) {
     const $contextMenu = $('#context-menu');
     $contextMenu.css({ left: x + 'px', top: y + 'px', display: 'block' });
-    
+
     // Show/hide options based on context
     if (hasSelectedItem) {
         $('#create-folder, #create-file').hide();
@@ -398,7 +397,7 @@ function showContextMenu(x, y, hasSelectedItem) {
         $('#create-folder, #create-file').show();
         $('#rename-item, #delete-item').hide();
     }
-    
+
     setTimeout(hideContextMenu, 5000);
 }
 
@@ -434,7 +433,7 @@ function createNewFolder() {
     if (folderName) {
         const currentFolder = getCurrentFolder();
         const uniqueFolderName = generateGloballyUniqueName(folderName, fileSystem);
-        
+
         $('.status_loader').css('display', 'block');
 
         $.ajax({
@@ -471,7 +470,7 @@ function createNewFile() {
     if (fileName) {
         const currentFolder = getCurrentFolder();
         const uniqueFileName = generateGloballyUniqueName(fileName, fileSystem);
-        
+
         $('.status_loader').css('display', 'block');
 
         $.ajax({
@@ -504,12 +503,12 @@ function createNewFile() {
 
 function renameSelectedItem() {
     if (!selectedItem) return;
-    
+
     const newName = prompt(`Enter new name for ${selectedItem.name}:`);
     if (newName && newName !== selectedItem.name) {
         const currentFolder = getCurrentFolder();
         const uniqueName = generateGloballyUniqueName(newName, fileSystem);
-        
+
         $('.status_loader').css('display', 'block');
 
         $.ajax({
@@ -538,10 +537,10 @@ function renameSelectedItem() {
 
 function deleteSelectedItem() {
     if (!selectedItem) return;
-    
+
     if (confirm(`Are you sure you want to delete ${selectedItem.name}?`)) {
         const currentFolder = getCurrentFolder();
-        
+
         $('.status_loader').css('display', 'block');
 
         $.ajax({
@@ -644,7 +643,7 @@ function setPassword() {
         alert('Please enter a password');
         return;
     }
-    
+
     $.ajax({
         url: window.location.pathname,
         method: 'POST',
@@ -686,10 +685,10 @@ function openFolderPasswordModal(folderId, folderName, isProtected) {
     const input = document.getElementById('new-folder-password');
     const setBtn = document.getElementById('set-folder-password-btn');
     const removeBtn = document.getElementById('remove-folder-password-btn');
-    
+
     text.textContent = isProtected ? `Change password for "${folderName}":` : `Set password for "${folderName}":`;
     input.value = '';
-    
+
     if (isProtected) {
         setBtn.textContent = 'Change Password';
         removeBtn.style.display = 'inline-block';
@@ -697,7 +696,7 @@ function openFolderPasswordModal(folderId, folderName, isProtected) {
         setBtn.textContent = 'Set Password';
         removeBtn.style.display = 'none';
     }
-    
+
     modal.style.display = 'block';
 }
 
@@ -712,7 +711,7 @@ function setFolderPassword() {
         alert('Please enter a password');
         return;
     }
-    
+
     $.ajax({
         url: window.location.pathname,
         method: 'POST',
@@ -786,7 +785,7 @@ function setInviteLock() {
         alert('Please enter a password');
         return;
     }
-    
+
     $.ajax({
         url: window.location.pathname,
         method: 'POST',

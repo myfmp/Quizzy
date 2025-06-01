@@ -901,6 +901,78 @@ function renameItem() {
               });
           };
 
+          // RestrictShare function similar to Restrict_Quizz
+          window.RestrictShare = function() {
+              var Restricted = $("#inpShareLock").prop('checked');
+              
+              if (Restricted == true) {
+                  // Get the input value
+                  var new_share_password = prompt('Enter a password');
+
+                  // Check if user canceled the prompt
+                  if (new_share_password === null) {
+                      // Uncheck the checkbox and notify the user
+                      $('#inpShareLock').prop('checked', false);
+                      return; // Exit the function
+                  }
+
+                  // Send an AJAX request to the same URL with CSRF token
+                  if (new_share_password !== '') {
+                      
+                      // Send an AJAX request to the same URL with CSRF token
+                      $.ajax({
+                          url: window.location.href,
+                          method: "POST",
+                          data: { share_password: new_share_password},
+                          headers: {
+                              'X-CSRFToken': getCSRFToken()
+                          },
+                          success: function(response) { 
+
+                              if ('status' in response && response.status === 'share_password_set') {
+
+                                  $('#inpShareLock').prop('checked', true);
+                                  alert('Share access locked')
+
+                              }
+
+                          }
+
+                      });
+
+                  } else {
+
+                      $('#inpShareLock').prop('checked', false);
+                      alert('Please enter a valid password.')
+
+                  }
+
+              } else {
+
+                  // Send an AJAX request to the same URL with CSRF token
+                  $.ajax({
+                      url: window.location.href,
+                      method: "POST",
+                      data: { remove_share_password: 'true'},
+                      headers: {
+                          'X-CSRFToken': getCSRFToken()
+                      },
+                      success: function(response) { 
+
+                          if ('status' in response && response.status === 'share_password_removed') {
+
+                              $('#inpShareLock').prop('checked', false);
+                              alert('Share access unlocked.')
+
+                          }
+
+                      }
+
+                  });
+
+              }
+          };
+
       });
 
     </script>
@@ -1116,73 +1188,91 @@ function renameItem() {
 }
 
 .btn-lock {
-  --stroke: #7C3AED;
-  display: block;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
   display: inline-block;
+  background: #ff5b5b;
+  width: 64px;
+  height: 64px;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-lock svg {
-  display: block;
-  transition: .3s;
-  transform-origin: center center;
-}
-
-.btn-lock svg .lock {
   fill: none;
-  stroke: var(--stroke);
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: .3s;
-  stroke-dasharray: 24px;
-}
-
-.btn-lock svg .lockb {
-  fill: var(--stroke);
-  transition: .3s;
+  transform: translate3d(0, 0, 0);
 }
 
 .btn-lock svg .bling {
-  fill: none;
-  stroke: var(--stroke);
-  stroke-width: 1.5;
+  stroke: #fff;
+  stroke-width: 2.5;
   stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 4px;
-  animation: bling .8s linear infinite;
-  animation-fill-mode: both;
-  opacity: 0;
+  stroke-dasharray: 3;
+  stroke-dashoffset: 15;
+  transition: all 0.3s ease;
 }
 
-.btn-lock input[type=checkbox] {
+.btn-lock svg .lock {
+  stroke: #fff;
+  stroke-width: 4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 36;
+  transition: all 0.4s ease;
+}
+
+.btn-lock svg .lockb {
+  fill: #fff;
+  fill-rule: evenodd;
+  clip-rule: evenodd;
+  transform: rotate(8deg);
+  transform-origin: 14px 20px;
+  transition: all 0.2s ease;
+}
+
+#inpShareLock {
   display: none;
 }
 
-.btn-lock input[type=checkbox]:checked + label svg {
-  transform: scale(.88);
+#inpShareLock:checked + label {
+  background: #20cca5;
 }
 
-.btn-lock input[type=checkbox]:checked + label svg .lock {
-  stroke-dasharray: 48px;
-}
-
-.btn-lock input[type=checkbox]:checked + label svg .bling {
-  animation-delay: .11s;
+#inpShareLock:checked + label svg {
   opacity: 1;
 }
 
-@keyframes bling {
-  0% {
-    opacity: 0;
+#inpShareLock:checked + label svg .bling {
+  animation: bling6132 0.3s linear forwards;
+  animation-delay: 0.2s;
+}
+
+#inpShareLock:checked + label svg .lock {
+  stroke-dasharray: 48;
+  animation: locked 0.3s linear forwards;
+}
+
+#inpShareLock:checked + label svg .lockb {
+  transform: rotate(0);
+  transform-origin: 14px 22px;
+}
+
+@keyframes bling6132 {
+  50% {
+    stroke-dasharray: 3;
+    stroke-dashoffset: 12;
   }
-  30% {
-    opacity: 1;
-  }
+
   100% {
-    opacity: 0;
+    stroke-dasharray: 3;
+    stroke-dashoffset: 9;
+  }
+}
+
+@keyframes locked {
+  50% {
+    transform: translateY(1px);
   }
 }
 </style>
@@ -1333,22 +1423,15 @@ function renameItem() {
           <!-- Lock Option -->
       <div class="sharing-section">
         <h3>Password Protection</h3>
-        <label class="btn-lock">
-          <input type="checkbox" id="lock-share-link">
-          <label for="lock-share-link">
-            <svg viewBox="0 0 32 32" height="32" width="32">
-              <defs>
-                <linearGradient gradientTransform="rotate(45)" id="gradient">
-                  <stop stop-color="#7C3AED" offset="30%"></stop>
-                  <stop stop-color="#DB2777" offset="90%"></stop>
-                </linearGradient>
-              </defs>
-              <path class="bling" d="M28.94,12.39a1.5,1.5,0,0,0-1.88-1.88L22.73,15.88a1.5,1.5,0,0,0,1.88,1.88Z" transform="translate(-1 -1)"></path>
-              <path class="bling" d="M9.17,12.39A1.5,1.5,0,0,1,7.29,10.51L14,3.82A1.5,1.5,0,0,1,15.88,5.71Z" transform="translate(-1 -1)"></path>
-              <path class="lock" d="M23,12V9a7,7,0,0,0-14,0v3"></path>
-              <rect class="lockb" x="5" y="12" width="14" height="14" rx="3" ry="3"></rect>
+        <input id="inpShareLock" type="checkbox" onclick="RestrictShare()"{% if has_share_password %} checked{% endif %}>
+        <label class="btn-lock" for="inpShareLock" style="margin-bottom: 10px;">
+            <svg width="36" height="40" style="margin-left: 7px;" viewBox="0 0 36 40">
+                <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
+                <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+                <path class="bling" d="M29 20L31 22"></path>
+                <path class="bling" d="M31.5 15H34.5"></path>
+                <path class="bling" d="M29 10L31 8"></path>
             </svg>
-          </label>
         </label>
       </div>
 

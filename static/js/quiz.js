@@ -127,8 +127,23 @@ $(document).ready(function() {
             console.log('Checkbox ' + id_2 + ' is now ' + (isChecked ? 'checked' : 'unchecked'));
         });
     }
+
+    function resetToInitialState() {
+        currentDivIndex = 0; // Reset to the first div
+        showWelcomePage(); // Show the welcome page
+        $('#format-btn').css('display','none'); // Hide the format button
+    }   
+
+    function showWelcomePage() {
+        $('#welcomePage').show();
+        $('.nav-div').hide();
+        $('#prevBtn').hide();
+        $('#nextBtn').hide();
+        $('#submitBtn').hide();
+    }
     
     $(".secondarysubmit").click(function() {
+        resetToInitialState();
         $('#format-btn').hide();
         $('.container-blend').hide();
         $('.container').show();

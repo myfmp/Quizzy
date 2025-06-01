@@ -7,8 +7,9 @@
 
   {% load static %}
 
-  <title>Quizzy - Editor</title>
+  <title>Quizzilo - Editor</title>
 
+  <link rel="icon" type="image/png" href="{% static 'media/logo.ico' %}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
   <link rel="stylesheet" type="text/css" href="{% static 'css/editor.css' %}">
@@ -51,6 +52,9 @@
     </li>
     <li class="navbar__item" id="how-to-preview-nav">
       <a href="quiz?session={{Quizz_id}}" class="navbar__link" target="_blank"><i data-feather="eye"></i><span id="how-it-works-preview">Preview</span></a>        
+    </li>
+    <li class="navbar__item" id="how-to-lovepdf-nav">
+      <a target="_blank" href="https://www.ilovepdf.com/split_pdf" class="navbar__link" onclick=""><i data-feather="scissors"></i><span style="white-space: nowrap;">Split-PDF</span></a>        
     </li>
     <li class="navbar__item" id="how-to-help-nav">
       <a href="#" class="navbar__link" onclick="Tutorial()"><i data-feather="help-circle"></i><span>Help</span></a>        
@@ -143,18 +147,6 @@
         Create
       </button>
 
-      <button class="modal__button-link close-modal">
-          Close
-      </button>
-
-    </div>
-
-    <div class="help_modal" style="display: none;">  
-
-      <h1 class="modal__title" style="margin-bottom: 20px;">Tutorial</h1>
-
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae, rerum enim nam ex placeat minus dolorum repudiandae ratione? Excepturi aspernatur ipsa nemo quae fuga est neque odio quos laboriosam architecto.</p>
-    
       <button class="modal__button-link close-modal">
           Close
       </button>

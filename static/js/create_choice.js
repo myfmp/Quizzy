@@ -11,6 +11,13 @@ function getCSRFToken() {
 
 function Create_New_Choice() {
 
+    $('.add_choice_modal').css('display', 'none');
+    $('.modal_loader').css('display', 'block');
+
+    // Show the modal
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.classList.add('show-modal');
+
     var urlParams = new URLSearchParams(window.location.search);
     var Question_id  = urlParams.get('question_id');
 
@@ -48,7 +55,13 @@ function Create_New_Choice() {
                         $('.add_choice_modal').css('display','none');
                     }, 500);            
                     const modalContainer = document.getElementById('modal-container')
-                    modalContainer.classList.remove('show-modal')
+                    setTimeout(function() {
+                        $('.add_question_modal').css('display', 'block');
+                        $('.modal_loader').css('display', 'none');
+                        $("#content_for_new_choice").val('');
+                    }, 500);
+
+                    modalContainer.classList.remove('show-modal');
                }
            }
          });

@@ -9,10 +9,22 @@ body {
     margin: auto;
     margin-top: 5vh;
     width: 80%;
-    height: 70vh;
+    height: 80vh;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     padding: 20px;
+}
+
+@media only screen and (max-width: 400px) {
+    .container {
+        margin: auto;
+        margin-top: 5vh;
+        width: 80%;
+        height: 70vh;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+    }
 }
 
 .nav-div {
@@ -193,3 +205,25 @@ transform: translate(-50%, -50%);
     max-width: 60vh;
     overflow-y: auto;
 }
+
+.custom-loader-2 {
+  margin: auto;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  border:8px solid;
+  border-color: gray #0000;
+  animation:s2 1s infinite;
+}
+
+#welcomePage{
+  margin-top: 30vh;
+}
+
+@media only screen and (max-width: 400px) {
+    #welcomePage{
+      margin-top: 20vh;
+    }
+}
+
+@keyframes s2 {to{transform: rotate(.5turn)}}

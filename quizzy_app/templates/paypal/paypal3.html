@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'media/logo.ico' %}">
+    <title>Quizzilo - Gateway</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .center-div {
+            width: 300px;
+            height: 200px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-div">
+
+        <div id="paypal-button-container-P-35P73396YH840463JM3X6WXA"></div>
+        <script src="https://www.paypal.com/sdk/js?client-id=AQ2td695S9inqw6ci_5m5PUERMQJwQYHmC8gao1FzjV0aPp4PQdgM9kOv8Uf_nwJ-UuplVy0-XPJI3P-&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+        <script>
+          paypal.Buttons({
+              style: {
+                  shape: 'rect',
+                  color: 'blue',
+                  layout: 'vertical',
+                  label: 'paypal'
+              },
+              createSubscription: function(data, actions) {
+                return actions.subscription.create({
+                  /* Creates the subscription */
+                  plan_id: 'P-35P73396YH840463JM3X6WXA'
+                });
+              },
+              onApprove: function(data, actions) {
+                
+                function getCSRFToken() {
+                var csrfToken = null;
+                document.cookie.split(';').forEach(function(cookie) {
+                var parts = cookie.split('=');
+                if (parts[0].trim() == 'csrftoken') {
+                csrfToken = parts[1].trim();
+                }
+                });
+                return csrfToken;
+                }
+
+                function Payement(Subscription_id) {
+
+                    $.ajax({
+                    url: window.location.href,
+                    method: "POST",
+                    data: { Subscription: Subscription_id},
+                    headers: {
+                    'X-CSRFToken': getCSRFToken()
+                    },
+                    success: function(response) {
+                    if ('DATA' in response) {
+                        
+                        window.location.href = "/payed";
+
+                    }
+                    }
+                    });
+
+                }
+
+                Payement(data.subscriptionID); // You can add optional success message for the subscriber here
+
+              }
+          }).render('#paypal-button-container-P-35P73396YH840463JM3X6WXA'); // Renders the PayPal button
+        </script>
+
+    </div>
+</body>
+</html>

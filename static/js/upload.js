@@ -41,71 +41,117 @@ function uploadFile() {
             xhr.upload.onprogress = function (e) {
                 if (e.lengthComputable) {
                     const percentComplete = (e.loaded / e.total) * 100;
-                    $('.uploader-modal').css('display','none');
-                    $('.modal_loader').css('display','block');
+                    $('.uploader-modal').css('display', 'none');
+                    $('.modal_loader').css('display', 'block');
                 }
             };
             return xhr;
         },
         success: function (response) {
-            
-            var currentUrl = window.location.href;
-            // Use the current URL to reload content
-            $('#jquery_load').load(currentUrl + ' #Questions_body', function() {
+            $.ajax({
+                url: window.location.href,
+                method: "POST",
+                data: { step2: response.DATA },
+                headers: { 'X-CSRFToken': getCSRFToken() },
+                success: function (response_2) {
+                    if ('DATA' in response_2) {
+                        $.ajax({
+                            url: window.location.href,
+                            method: "POST",
+                            data: { step3: response_2.DATA },
+                            headers: { 'X-CSRFToken': getCSRFToken() },
+                            success: function (response_3) {
+                                if ('DATA' in response_3) {
+                                    let data = response_3.DATA;
 
-                feather.replace();
+                                    // Function to chunk an array into smaller arrays of given size
+                                    function chunkArray(arr, chunkSize) {
+                                        let chunks = [];
+                                        for (let i = 0; i < arr.length; i += chunkSize) {
+                                            chunks.push(arr.slice(i, i + chunkSize));
+                                        }
+                                        return chunks;
+                                    }
 
-                // Make the divs inside parentDiv sortable
-                $("#Questions_body").sortable({
-                    update: function(event, ui) {
-    
-                    // Update the IDs of each child div according to their new 
-    
-                    $("#Questions_body .Question").each(function(index) {
-                        $(this).attr("id", (index + 1));
-                    });
-    
-    
-                    let resultArray = [];
-    
-                    $('.Question').each(function() {
-                        // Get the ID of the current div
-                        let divId = $(this).attr('id');
-                        
-                        // Find the textarea inside this div and get its ID
-                        let textareaId = $(this).find('textarea').attr('id');
-                        
-                        // Extract just the number from the textarea ID
-                        let number = textareaId.match(/\d+$/)[0];
-                        
-                        // Append the div ID and extracted number to the result array
-                        resultArray.push([divId, number]);
-                    });
-    
-                    $.ajax({
-                        url: window.location.href,
-                        method: "POST",
-                        data: { New_Questions_Order : JSON.stringify(resultArray) },
-                        headers: {
-                            'X-CSRFToken': getCSRFToken()
-                        }
-                    });
-    
+                                    let chunkedData = chunkArray(data, 20);
+
+                                    // Function to send each chunk sequentially
+                                    function sendChunksSequentially(chunks) {
+                                        // Check if there are no chunks left to process
+                                        if (chunks.length === 0) {
+                                            // All chunks have been sent
+                                            var currentUrl = window.location.href;
+
+                                            // Load the new content into the UI
+                                            $('#jquery_load').load(currentUrl + ' #Questions_body', function () {
+                                                feather.replace();
+
+                                                // Make the divs inside Questions_body sortable
+                                                $("#Questions_body").sortable({
+                                                    update: function (event, ui) {
+                                                        // Update the IDs of each child div
+                                                        $("#Questions_body .Question").each(function (index) {
+                                                            $(this).attr("id", (index + 1));
+                                                        });
+
+                                                        let resultArray = [];
+                                                        $('.Question').each(function () {
+                                                            let divId = $(this).attr('id');
+                                                            let textareaId = $(this).find('textarea').attr('id');
+                                                            let number = textareaId.match(/\d+$/)[0];
+                                                            resultArray.push([divId, number]);
+                                                        });
+
+                                                        // Send the new order
+                                                        $.ajax({
+                                                            url: window.location.href,
+                                                            method: "POST",
+                                                            data: { New_Questions_Order: JSON.stringify(resultArray) },
+                                                            headers: { 'X-CSRFToken': getCSRFToken() }
+                                                        });
+                                                    }
+                                                });
+                                            });
+
+                                            // Hide loader, show modal, and update status
+                                            $('.modal_loader').css('display', 'none');
+                                            $('.uploader-modal').css('display', 'block');
+                                            document.getElementById('status').innerText = 'Upload complete!';
+                                            return; // Ensure we exit the function here to prevent further execution
+                                        }
+
+                                        // Proceed with sending the next chunk
+                                        const currentChunk = chunks.shift(); // Get the first chunk
+
+                                        $.ajax({
+                                            url: window.location.href,
+                                            method: "POST",
+                                            data: { step4: JSON.stringify(currentChunk) },
+                                            headers: { 'X-CSRFToken': getCSRFToken() }
+                                        }).done(function () {
+                                            // Send the next chunk
+                                            sendChunksSequentially(chunks);
+                                        }).fail(function () {
+                                            // Handle the error
+                                            $('.modal_loader').css('display', 'none');
+                                            $('.uploader-modal').css('display', 'block');
+                                            document.getElementById('status').innerText = 'Upload failed!';
+                                        });
+                                    }
+
+                                    // Start sending chunks
+                                    sendChunksSequentially(chunkedData);
+                                }
+                            }
+                        });
                     }
-                    });   
-
+                }
             });
-
-            $('.modal_loader').css('display','none');
-            $('.uploader-modal').css('display','block');
-            document.getElementById('status').innerText = 'Upload complete!';
-            // Handle success response (e.g., display a message or update the UI)
         },
         error: function (xhr, status, error) {
-            $('.modal_loader').css('display','none');
-            $('.uploader-modal').css('display','block');
+            $('.modal_loader').css('display', 'none');
+            $('.uploader-modal').css('display', 'block');
             document.getElementById('status').innerText = 'Upload failed!';
-            // Handle error response (e.g., display an error message)
         }
     });
 }

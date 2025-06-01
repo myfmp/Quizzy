@@ -15,17 +15,22 @@ function Create_New_Quizz() {
 
  if (Title && Title.trim() !== "") {
 
+    $('.main_modal').css('display', 'none');
+    $('.modal_loader').css('display', 'block');
+
     // Send an AJAX request to the same URL with CSRF token
     $.ajax({
         url: window.location.href,
         method: "POST",
-        data: { New_Quizz_Title: Title },
+        data: { New_Quizz_Title: Title, Parent_Quizz_Folder: 'root' },
         headers: {
           'X-CSRFToken': getCSRFToken()
         },
         success: function(response) {
             if ('URL' in response) {
                 window.location.href = "/editor?session="+response.URL;
+            }else{
+                window.location.href = "/pricing";
             }
         }
       });

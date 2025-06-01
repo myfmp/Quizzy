@@ -26,9 +26,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-x*t8g7kt%8(2jc&r937+t!mlu&25z9n#go+74e#jeajcs&%$2t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://f20f672b-dbc9-4342-aa9f-17eaa4238093-00-1r6uzdci07g39.janeway.replit.dev',
+    'https://*.replit.dev',
+    'https://*.repl.co'
+]
 
 # Application definition
 
@@ -168,11 +174,14 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 LOGIN_REDIRECT_URL = '/dashboard'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.zoho.com'
 EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'myfmp2023@gmail.com'
-EMAIL_HOST_PASSWORD = 'yjcp dhkc xfbt lqlj'
+EMAIL_USE_TLS = True  # Use TLS for secure connection
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'noreply@quizzilo.com'
+EMAIL_HOST_PASSWORD = 'JamnwirM7Ug8'  # If using 2FA, use app-specific password
+DEFAULT_FROM_EMAIL = 'noreply@quizzilo.com'
+
 
 # Cloudinary
 CLOUDINARY_STORAGE = {

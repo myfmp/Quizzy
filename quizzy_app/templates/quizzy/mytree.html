@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  
+  {% load static %}
+
+  <title>Quizzilo - Dashboard</title>
+
+  <link rel="icon" type="image/png" href="{% static 'media/logo.ico' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/mytree.css' %}">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+    window.console = window.console || function(t) {};
+  </script>
+
+</head>
+
+<body translate="no">
+
+<div class="bank-manager-container" id="file-explorer">
+<div id="navigation">
+    <button id="back-btn" disabled>←</button>
+    <button id="forward-btn" disabled>→</button>
+    {% if allowEdit %}
+        <button id="password-btn" onclick="togglePasswordProtection()">🔒 Tree Password</button>
+    {% endif %}
+    <div style="display: none;" class="status_loader">
+        <div class="custom-loader-3"></div>
+    </div>
+</div>
+<div id="path-bar">/</div>
+<div id="file-list"></div>
+</div>
+
+<!-- Password Protection Modal -->
+<div id="password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; min-width: 300px;">
+        <h3>Tree Password Protection</h3>
+        <div id="password-status">
+            {% if has_password %}
+                <p style="color: green;">✓ Tree password protection is enabled</p>
+                <button onclick="removePassword()" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Remove Tree Password</button>
+            {% else %}
+                <p>Set a password to protect this entire shared tree:</p>
+                <input type="password" id="new-password" placeholder="Enter new password" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+                <button onclick="setPassword()" style="background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Set Tree Password</button>
+            {% endif %}
+        </div>
+        <button onclick="closePasswordModal()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-left: 10px;">Close</button>
+    </div>
+</div>
+
+<!-- Folder Password Protection Modal -->
+<div id="folder-password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; min-width: 300px;">
+        <h3>Folder Password Protection</h3>
+        <div id="folder-password-status">
+            <p id="folder-password-text">Set a password to protect this folder:</p>
+            <input type="password" id="new-folder-password" placeholder="Enter folder password" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+            <div id="folder-password-buttons">
+                <button id="set-folder-password-btn" onclick="setFolderPassword()" style="background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Set Folder Password</button>
+                <button id="remove-folder-password-btn" onclick="removeFolderPassword()" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: none;">Remove Folder Password</button>
+            </div>
+        </div>
+        <button onclick="closeFolderPasswordModal()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-left: 10px;">Close</button>
+    </div>
+</div>
+
+<script>
+
+$(document).ready(function() {
+
+function getCSRFToken() {
+    var csrfToken = null;
+    document.cookie.split(';').forEach(function(cookie) {
+        var parts = cookie.split('=');
+        if (parts[0].trim() == 'csrftoken') {
+        csrfToken = parts[1].trim();
+        }
+    });
+    return csrfToken;
+}
+
+const fileSystem = {{ Tree_JSON|safe }};
+
+// Get URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+const allowEdit = {{ allowEdit|yesno:"true,false" }};
+const sharedPath = '{{ path }}' || '/';
+const sharedFolderId = '{{ folderId }}' || 'root';
+
+let currentPath = sharedPath;
+let navigationHistory = [sharedPath];
+let currentHistoryIndex = 0;
+let draggedItem = null;
+let selectedItem = null;
+let contextMenuTimeout;
+
+function renderFiles() {
+    const $fileList = $('#file-list');
+    $fileList.empty();
+
+    // Add edit mode indicator
+    if (allowEdit) {
+        const $editIndicator = $(`
+            <div class="edit-mode-indicator">
+                <span class="edit-icon">✏️</span>
+                <span>Edit Mode - You can modify this shared content</span>
+            </div>
+        `);
+        $fileList.append($editIndicator);
+    } else {
+        const $viewIndicator = $(`
+            <div class="view-mode-indicator">
+                <span class="view-icon">👁️</span>
+                <span>View Only - Shared content (read-only)</span>
+            </div>
+        `);
+        $fileList.append($viewIndicator);
+    }
+
+    const currentFolder = getCurrentFolder();
+    Object.keys(currentFolder.children).forEach(name => {
+        const item = currentFolder.children[name];
+        const isProtected = item.protected || false;
+        const lockIcon = isProtected ? '🔒' : '';
+        const $item = $(`
+            <div class="file-item" 
+                    data-id="${item.id}"
+                    data-name="${name}" 
+                    data-type="${item.type}"
+                    data-protected="${isProtected}"
+                    ${item.locked ? 'data-locked="true"' : ''}
+                    ${allowEdit ? 'draggable="true"' : ''}>
+                <span class="file-icon">${item.type === 'folder' ? '📁' + lockIcon : '📄'}</span>
+                <span class="file-name" ${item.locked ? 'style="color:red;"' : ''}>${item.type === 'folder' ? name : `<a target="_blank" href=https://www.quizzilo.com/bridge2?id=${item.id}>${name}</a>`}</span>
+            </div>
+        `);
+        $fileList.append($item);
+    });
+
+    if (allowEdit) {
+        setupDragAndDrop();
+        setupContextMenu();
+    }
+    
+    updatePathBar();
+    updateNavigationButtons();
+}
+
+function getCurrentFolder() {
+    let folder = fileSystem['/'];
+    const pathParts = currentPath.split('/').filter(p => p);
+    
+    for (let part of pathParts) {
+        folder = folder.children[part];
+    }
+    return folder;
+}
+
+function updatePathBar() {
+    $('#path-bar').text(currentPath);
+}
+
+function updateNavigationButtons() {
+    $('#back-btn').prop('disabled', currentHistoryIndex <= 0);
+    $('#forward-btn').prop('disabled', currentHistoryIndex >= navigationHistory.length - 1);
+}
+
+
+$(document).on('click', '.file-item', function() {
+    const name = $(this).data('name');
+    const type = $(this).data('type');
+
+    if (type === 'folder') {
+        currentPath = currentPath.endsWith('/') ? currentPath + name : currentPath + '/' + name;
+        navigationHistory = navigationHistory.slice(0, currentHistoryIndex + 1);
+        navigationHistory.push(currentPath);
+        currentHistoryIndex++;
+        renderFiles();
+    }
+});
+
+$('#back-btn').click(function() {
+    if (currentHistoryIndex > 0) {
+        currentHistoryIndex--;
+        currentPath = navigationHistory[currentHistoryIndex];
+        renderFiles();
+    }
+});
+
+$('#forward-btn').click(function() {
+    if (currentHistoryIndex < navigationHistory.length - 1) {
+        currentHistoryIndex++;
+        currentPath = navigationHistory[currentHistoryIndex];
+        renderFiles();
+    }
+});
+
+// Add edit functions if edit mode is enabled
+if (allowEdit) {
+    
+    function setupDragAndDrop() {
+        $('.file-item').off('dragstart dragover dragleave drop');
+        
+        $('.file-item').on('dragstart', function(e) {
+            draggedItem = {
+                id: $(this).data('id'),
+                name: $(this).data('name'),
+                type: $(this).data('type')
+            };
+            e.originalEvent.dataTransfer.setData('text/plain', '');
+        });
+
+        $('.file-item').on('dragover', function(e) {
+            e.preventDefault();
+            const targetType = $(this).data('type');
+            if (targetType === 'folder') {
+                $(this).addClass('drag-over');
+            }
+        });
+
+        $('.file-item').on('dragleave', function() {
+            $(this).removeClass('drag-over');
+        });
+
+        $('.file-item').on('drop', function(e) {
+            e.preventDefault();
+            $(this).removeClass('drag-over');
+
+            const targetId = $(this).data('id');
+            const targetName = $(this).data('name');
+            const targetType = $(this).data('type');
+
+            if (targetType === 'folder' && draggedItem && draggedItem.id !== targetId) {
+                // Move item logic here
+                const currentFolder = getCurrentFolder();
+                const targetFolder = currentFolder.children[targetName];
+                
+                targetFolder.children[draggedItem.name] = currentFolder.children[draggedItem.name];
+                delete currentFolder.children[draggedItem.name];
+                
+                renderFiles();
+                draggedItem = null;
+            }
+        });
+    }
+
+    function setupContextMenu() {
+        $('#file-explorer').off('contextmenu').on('contextmenu', function(e) {
+            e.preventDefault();
+            const $target = $(e.target).closest('.file-item');
+            
+            if ($target.length) {
+                selectedItem = {
+                    id: $target.data('id'),
+                    name: $target.data('name'),
+                    type: $target.data('type'),
+                    element: $target
+                };
+                showContextMenu(e.clientX, e.clientY);
+            } else {
+                showCreateContextMenu(e.clientX, e.clientY);
+            }
+        });
+    }
+
+    function showContextMenu(x, y) {
+        const $contextMenu = $('<div class="context-menu">');
+        $contextMenu.css({ left: x + 'px', top: y + 'px' });
+        
+        $contextMenu.append($('<div>').text('Rename').click(function() { renameSelectedItem(); hideContextMenu(); }));
+        $contextMenu.append($('<div>').text('Delete').click(function() { deleteSelectedItem(); hideContextMenu(); }));
+        
+        if (selectedItem && selectedItem.type === 'folder') {
+            const isProtected = selectedItem.element.data('protected') === 'true' || selectedItem.element.data('protected') === true;
+            const passwordText = isProtected ? 'Change Password' : 'Set Password';
+            $contextMenu.append($('<div>').text(passwordText).click(function() { openFolderPasswordModal(selectedItem.id, selectedItem.name, isProtected); hideContextMenu(); }));
+            
+            if (isProtected) {
+                $contextMenu.append($('<div>').text('Remove Password').click(function() { removeFolderPasswordDirect(selectedItem.id); hideContextMenu(); }));
+            }
+        }
+        
+        $('body').append($contextMenu);
+        setTimeout(hideContextMenu, 3000);
+    }
+
+    function showCreateContextMenu(x, y) {
+        const $contextMenu = $('<div class="context-menu">');
+        $contextMenu.css({ left: x + 'px', top: y + 'px' });
+        
+        $contextMenu.append($('<div>').text('New Folder').click(function() { createNewFolder(); hideContextMenu(); }));
+        $contextMenu.append($('<div>').text('New File').click(function() { createNewFile(); hideContextMenu(); }));
+        
+        $('body').append($contextMenu);
+        setTimeout(hideContextMenu, 3000);
+    }
+
+    function hideContextMenu() {
+        $('.context-menu').remove();
+    }
+
+    function renameItem(btn) {
+        const $fileItem = $(btn).closest('.file-item');
+        selectedItem = {
+            id: $fileItem.data('id'),
+            name: $fileItem.data('name'),
+            type: $fileItem.data('type'),
+            element: $fileItem
+        };
+        renameSelectedItem();
+    }
+
+    function deleteItem(btn) {
+        const $fileItem = $(btn).closest('.file-item');
+        selectedItem = {
+            id: $fileItem.data('id'),
+            name: $fileItem.data('name'),
+            type: $fileItem.data('type'),
+            element: $fileItem
+        };
+        deleteSelectedItem();
+    }
+
+    function renameSelectedItem() {
+        if (!selectedItem) return;
+        
+        const newName = prompt(`Enter new name for ${selectedItem.name}:`);
+        if (newName && newName !== selectedItem.name) {
+            const currentFolder = getCurrentFolder();
+            currentFolder.children[newName] = currentFolder.children[selectedItem.name];
+            delete currentFolder.children[selectedItem.name];
+            renderFiles();
+        }
+    }
+
+    function deleteSelectedItem() {
+        if (!selectedItem) return;
+        
+        if (confirm(`Are you sure you want to delete ${selectedItem.name}?`)) {
+            const currentFolder = getCurrentFolder();
+            delete currentFolder.children[selectedItem.name];
+            renderFiles();
+        }
+    }
+
+    function createNewFolder() {
+        const folderName = prompt('Enter folder name:');
+        if (folderName) {
+            const currentFolder = getCurrentFolder();
+            currentFolder.children[folderName] = {
+                type: 'folder',
+                id: 'new_' + Date.now(),
+                children: {}
+            };
+            renderFiles();
+        }
+    }
+
+    function createNewFile() {
+        const fileName = prompt('Enter file name:');
+        if (fileName) {
+            const currentFolder = getCurrentFolder();
+            currentFolder.children[fileName] = {
+                type: 'file',
+                id: 'new_file_' + Date.now()
+            };
+            renderFiles();
+        }
+    }
+}
+
+renderFiles();
+
+// Password protection functions
+function togglePasswordProtection() {
+    document.getElementById('password-modal').style.display = 'block';
+}
+
+function closePasswordModal() {
+    document.getElementById('password-modal').style.display = 'none';
+}
+
+function setPassword() {
+    const password = document.getElementById('new-password').value;
+    if (!password) {
+        alert('Please enter a password');
+        return;
+    }
+    
+    $.ajax({
+        url: window.location.pathname,
+        method: 'POST',
+        data: {
+            'set_password': password,
+            'csrfmiddlewaretoken': getCSRFToken()
+        },
+        success: function(response) {
+            if (response.status === 'password_set') {
+                location.reload();
+            }
+        }
+    });
+}
+
+function removePassword() {
+    $.ajax({
+        url: window.location.pathname,
+        method: 'POST',
+        data: {
+            'remove_password': 'true',
+            'csrfmiddlewaretoken': getCSRFToken()
+        },
+        success: function(response) {
+            if (response.status === 'password_removed') {
+                location.reload();
+            }
+        }
+    });
+}
+
+// Folder password protection functions
+let currentFolderId = null;
+
+function openFolderPasswordModal(folderId, folderName, isProtected) {
+    currentFolderId = folderId;
+    const modal = document.getElementById('folder-password-modal');
+    const text = document.getElementById('folder-password-text');
+    const input = document.getElementById('new-folder-password');
+    const setBtn = document.getElementById('set-folder-password-btn');
+    const removeBtn = document.getElementById('remove-folder-password-btn');
+    
+    text.textContent = isProtected ? `Change password for "${folderName}":` : `Set password for "${folderName}":`;
+    input.value = '';
+    
+    if (isProtected) {
+        setBtn.textContent = 'Change Password';
+        removeBtn.style.display = 'inline-block';
+    } else {
+        setBtn.textContent = 'Set Password';
+        removeBtn.style.display = 'none';
+    }
+    
+    modal.style.display = 'block';
+}
+
+function closeFolderPasswordModal() {
+    document.getElementById('folder-password-modal').style.display = 'none';
+    currentFolderId = null;
+}
+
+function setFolderPassword() {
+    const password = document.getElementById('new-folder-password').value;
+    if (!password) {
+        alert('Please enter a password');
+        return;
+    }
+    
+    $.ajax({
+        url: window.location.pathname,
+        method: 'POST',
+        data: {
+            'folder_password': password,
+            'folder_id': currentFolderId,
+            'csrfmiddlewaretoken': getCSRFToken()
+        },
+        success: function(response) {
+            if (response.status === 'folder_password_set') {
+                closeFolderPasswordModal();
+                renderFiles(); // Refresh the view to show lock icon
+            } else if (response.status === 'error') {
+                alert(response.message || 'Error setting password');
+            }
+        }
+    });
+}
+
+function removeFolderPassword() {
+    if (confirm('Are you sure you want to remove the password protection from this folder?')) {
+        $.ajax({
+            url: window.location.pathname,
+            method: 'POST',
+            data: {
+                'unlock_folder': 'true',
+                'folder_id': currentFolderId,
+                'csrfmiddlewaretoken': getCSRFToken()
+            },
+            success: function(response) {
+                if (response.status === 'folder_unlocked') {
+                    closeFolderPasswordModal();
+                    renderFiles(); // Refresh the view to remove lock icon
+                }
+            }
+        });
+    }
+}
+
+function removeFolderPasswordDirect(folderId) {
+    if (confirm('Are you sure you want to remove the password protection from this folder?')) {
+        $.ajax({
+            url: window.location.pathname,
+            method: 'POST',
+            data: {
+                'unlock_folder': 'true',
+                'folder_id': folderId,
+                'csrfmiddlewaretoken': getCSRFToken()
+            },
+            success: function(response) {
+                if (response.status === 'folder_unlocked') {
+                    renderFiles(); // Refresh the view to remove lock icon
+                }
+            }
+        });
+    }
+}
+
+});
+
+</script>
+
+</body>

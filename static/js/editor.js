@@ -91,39 +91,38 @@ $(document).ready(function() {
     // Make the divs inside parentDiv sortable
     $("#Questions_body").sortable({
         update: function(event, ui) {
-
-            // Update the IDs of each child div according to their new 
-            
-            $("#Questions_body .Question").each(function(index) {
-                $(this).attr("id", (index + 1));
+    
+            // Update the IDs of each visible child div according to their new order
+            $("#Questions_body .Question:visible").each(function(index) {
+                $(this).attr("id", (index + 1));  // Reassign IDs to visible divs only
             });
-
-
+    
             let resultArray = [];
-
-            $('.Question').each(function() {
+    
+            // Only process visible .Question divs
+            $('.Question:visible').each(function() {
                 // Get the ID of the current div
                 let divId = $(this).attr('id');
-                
+    
                 // Find the textarea inside this div and get its ID
                 let textareaId = $(this).find('textarea').attr('id');
-                
+    
                 // Extract just the number from the textarea ID
                 let number = textareaId.match(/\d+$/)[0];
-                
+    
                 // Append the div ID and extracted number to the result array
                 resultArray.push([divId, number]);
             });
-
+    
+            // Send the updated order of visible divs via AJAX
             $.ajax({
                 url: window.location.href,
                 method: "POST",
-                data: { New_Questions_Order : JSON.stringify(resultArray) },
+                data: { New_Questions_Order: JSON.stringify(resultArray) },
                 headers: {
                   'X-CSRFToken': getCSRFToken()
                 }
             });
-
         }
     });
 

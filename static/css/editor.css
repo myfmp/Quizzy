@@ -1445,6 +1445,7 @@ img{
 }
 
 .choice{
+  min-width: 750px;
   cursor: default;
   padding: 10px;
   display: flex;

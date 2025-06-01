@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+
+  {% load static %}
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" type="image/png" href="{% static 'media/logo.ico' %}">
+
+  <title>Quizzilo - Pricing</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700'>
+
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'>
+  
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css'>
+
+  <link rel="stylesheet" type="text/css" href="{% static 'css/pricing.css' %}">
+
+<script>
+  window.console = window.console || function(t) {};
+</script>
+
+  
+  
+</head>
+
+<body translate="no">
+  <div class="background">
+  <div class="container">
+    <div class="panel pricing-table">
+      
+      <div class="pricing-plan">
+        <img src="https://s22.postimg.cc/8mv5gn7w1/paper-plane.png" alt="" class="pricing-img">
+        <h2 class="pricing-header">Monthly</h2>
+        <ul class="pricing-features">
+          <li class="pricing-features-item">1 month</li>
+          <li class="pricing-features-item">No payment will be taken after one month unless you manually repay.</li>
+        </ul>
+        <span class="pricing-price">$4,99</span>
+        <a href="/pay?type=1" class="pricing-button is-featured open-modal">Let go</a>
+      </div>
+      
+      <div class="pricing-plan">
+        <img src="https://s28.postimg.cc/ju5bnc3x9/plane.png" alt="" class="pricing-img">
+        <h2 class="pricing-header">Biannualy</h2>
+        <ul class="pricing-features">
+            <li class="pricing-features-item">6 month</li>
+            <li class="pricing-features-item">Save 5$.</li>
+            <li class="pricing-features-item">No payment will be taken after six month unless you manually repay.</li>
+        </ul>
+        <span class="pricing-price">$24.99</span>
+        <a href="/pay?type=2" class="pricing-button is-featured open-modal">Let go</a>
+      </div>
+      
+      <div class="pricing-plan">
+        <img src="https://s21.postimg.cc/tpm0cge4n/space-ship.png" alt="" class="pricing-img">
+        <h2 class="pricing-header">Yearly</h2>
+        <ul class="pricing-features">
+            <li class="pricing-features-item">12 month</li>
+            <li class="pricing-features-item">Save 10$.</li>
+            <li class="pricing-features-item">No payment will be taken after twelve month unless you manually repay.</li>
+        </ul>
+        <span class="pricing-price">$49.99</span>
+        <a href="/pay?type=3" class="pricing-button is-featured open-modal">Let go</a>
+      </div>
+      
+    </div>
+  </div>
+</div>
+  
+<div class="modal__container" id="modal-container"></div>
+
+  <div class="modal__content">
+
+      <h1 class="modal__title">New Quiz</h1>
+
+      <p class="modal__description">Enter a title for your quiz.</p>
+
+      {% csrf_token %}
+
+      <input id="title_for_new_quizz"  class="modal__button modal__button-width" placeholder="e.g: Exam N 9">
+
+      <button onclick="Create_New_Quizz()" class="modal__button modal__button-width_2" style="background-color: #007bff; color: white;  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); margin: 10px;">
+        Create
+      </button>
+
+      <button class="modal__button-link close-modal">
+          Close
+      </button>
+
+    </div>
+
+</div>
+
+<script src="{% static 'js/pricing.js' %}"></script>
+  
+</body>
+
+</html>

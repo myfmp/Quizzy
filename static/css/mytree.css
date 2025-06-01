@@ -1,0 +1,133 @@
+.bank-manager-container{
+border: 1px solid gray;
+position: absolute;
+z-index: 3;
+margin-top: 10vh;
+margin-left: 10%;
+width: 80%;
+height: 80vh;
+background-color: white;
+border-radius: 10px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+#file-explorer {
+z-index: 100;
+background-color: white;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+#path-bar {
+padding: 10px;
+background-color: #f8f8f8;
+border-bottom: 1px solid #e0e0e0;
+}
+#navigation {
+display: flex;
+margin-bottom: 10px;
+}
+#navigation button {
+margin: 10px;
+border: none;
+border-radius: 10px;
+margin-right: 5px;
+}
+#file-list {
+height: 65vh;
+overflow-y: auto;
+}
+.file-item {
+padding: 8px;
+cursor: pointer;
+display: flex;
+align-items: center;
+user-select: none;
+position: relative;
+}
+.file-item:hover {
+background-color: #f0f0f0;
+}
+.file-icon {
+margin-right: 10px;
+}
+
+.edit-mode-indicator,
+.view-mode-indicator {
+padding: 10px;
+margin: 10px;
+border-radius: 6px;
+display: flex;
+align-items: center;
+font-weight: 500;
+font-size: 0.9em;
+}
+
+.edit-mode-indicator {
+background-color: #d4edda;
+color: #155724;
+border: 1px solid #c3e6cb;
+}
+
+.view-mode-indicator {
+background-color: #d1ecf1;
+color: #0c5460;
+border: 1px solid #bee5eb;
+}
+
+.edit-icon,
+.view-icon {
+margin-right: 8px;
+font-size: 1.1em;
+}
+
+.edit-actions {
+margin-left: auto;
+display: none;
+gap: 5px;
+}
+
+.file-item:hover .edit-actions {
+display: flex;
+}
+
+.rename-btn,
+.delete-btn {
+background: none;
+border: none;
+cursor: pointer;
+padding: 4px;
+border-radius: 3px;
+font-size: 0.9em;
+}
+
+.rename-btn:hover {
+background-color: #007bff;
+color: white;
+}
+
+.delete-btn:hover {
+background-color: #dc3545;
+color: white;
+}
+
+.drag-over {
+background-color: #e0e0e0;
+}
+
+.context-menu {
+position: fixed;
+background-color: white;
+border: 1px solid #ccc;
+border-radius: 4px;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+z-index: 1000;
+min-width: 120px;
+}
+
+.context-menu div {
+padding: 8px 12px;
+cursor: pointer;
+font-size: 0.9em;
+}
+
+.context-menu div:hover {
+background-color: #f0f0f0;
+}

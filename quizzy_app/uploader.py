@@ -1,7 +1,7 @@
 import os
 import uuid
 from django.core.files.storage import default_storage
-from .converter import Convert_To_Test
+from .converter import *
 
 def upload_file(file, quizz_id):
     # Valid extensions and maximum file size in bytes
@@ -27,6 +27,4 @@ def upload_file(file, quizz_id):
 
     download_link = default_storage.url(file_path)
 
-    Convert_To_Test(download_link,quizz_id)
-
-    return {'success': True, 'download_link': download_link}
+    return OCR(download_link)

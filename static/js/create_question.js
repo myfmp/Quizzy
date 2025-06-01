@@ -11,6 +11,13 @@ function getCSRFToken() {
 
 function Create_New_Question() {
 
+    $('.add_question_modal').css('display', 'none');
+    $('.modal_loader').css('display', 'block');
+
+    // Show the modal
+    const modalContainer = document.getElementById('modal-container');
+    modalContainer.classList.add('show-modal');
+
     var Question_Content = $("#content_for_new_question").val();
 
     if (Question_Content && Question_Content.trim() !== "") {
@@ -41,7 +48,14 @@ function Create_New_Question() {
                     `);     
                     $('#Questions_body').scrollTop($('#Questions_body')[0].scrollHeight);           
                     const modalContainer = document.getElementById('modal-container')
-                    modalContainer.classList.remove('show-modal')
+                        // Hide the loader and show the modal
+                        setTimeout(function() {
+                            $('.add_question_modal').css('display', 'block');
+                            $('.modal_loader').css('display', 'none');
+                           $("#content_for_new_question").val('');
+                        }, 500);
+
+                        modalContainer.classList.remove('show-modal');
                }
            }
          });

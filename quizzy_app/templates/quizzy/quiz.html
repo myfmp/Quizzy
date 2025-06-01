@@ -10,6 +10,8 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="icon" type="image/png" href="{% static 'media/logo.ico' %}">
+    
     <link rel="stylesheet" type="text/css" href="{% static 'css/quiz.css' %}">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
@@ -21,7 +23,7 @@
     <!-- KaTeX Auto-render extension -->
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
 
-    <title>Quizzy - Quiz</title>
+    <title>{{Quizz_Title}}</title>
 
 </head>
 
@@ -46,8 +48,8 @@
         <script>
             document.addEventListener("DOMContentLoaded", function() {
 
-                 var text = "{{ Load_Quizz_Questions.2 }}";
-                 var Text = text.replace(/\\n/g, ' ');
+                 var text = `{{ Load_Quizz_Questions.2 }}`;
+                 var Text = text;
 
                 // Get the container where LaTeX will be rendered
                 const container = document.getElementById('question_blend_{{ Load_Quizz_Questions.0 }}');
@@ -91,8 +93,8 @@
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
 
-                    var text = "{{ Load_Questions_Choices.2 }}";
-                    var Text = text.replace(/\\n/g, ' ').replace(/\\\\/g, '').replace(/\n/g, ' ');
+                    var text = `{{ Load_Questions_Choices.2 }}`;
+                    var Text = text;
 
                     // Get the container where LaTeX will be rendered
                     const container = document.getElementById('choice_blend_{{ Load_Questions_Choices.0 }}');
@@ -130,7 +132,7 @@
 
 <div class="container">
 
-    <div id="welcomePage" style="margin-top: 30vh;">
+    <div id="welcomePage">
         <h1 style="color: #007bff;" >{{Quizz_Title}}</h1>
         <button id="startBtn" class="nav-btn">Start</button>
     </div>
@@ -146,8 +148,8 @@
          <script>
             document.addEventListener("DOMContentLoaded", function() {
 
-                 var text = "{{ Load_Quizz_Questions.2 }}";
-                 var Text = text.replace(/\\n/g, ' ');
+                 var text = `{{ Load_Quizz_Questions.2 }}`;
+                 var Text = text;
 
                 // Get the container where LaTeX will be rendered
                 const container = document.getElementById('question_{{ Load_Quizz_Questions.0 }}');
@@ -182,7 +184,7 @@
                     
                     <h4 id="choice_{{ Load_Questions_Choices.0 }}"></h4>
                     <div class="input_to_answer">
-                    <input type="checkbox" class="choice_answer_2" id="input_to_check_{{ Load_Questions_Choices.0 }}" onclick="check_the_box('{{ Load_Questions_Choices.0 }}')">
+                    <input type="checkbox" class="choice_answer_2" id="input_to_check_{{ Load_Questions_Choices.0 }}" onclick="check_the_box('{{ Load_Questions_Choices.0 }}')" data-answer="{{ Load_Questions_Choices.3 }}">
                     <span class="checkbox" id="checkbox_span_{{ Load_Questions_Choices.0 }}"></span>
                     </div>
 
@@ -193,8 +195,8 @@
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
 
-                    var text = "{{ Load_Questions_Choices.2 }}";
-                    var Text = text.replace(/\\n/g, ' ').replace(/\n/g, ' ');
+                    var text = `{{ Load_Questions_Choices.2 }}`;
+                    var Text = text;
 
                     // Get the container where LaTeX will be rendered
                     const container = document.getElementById('choice_{{ Load_Questions_Choices.0 }}');
@@ -231,6 +233,20 @@
     <button id="prevBtn" class="nav-btn">Previous</button>
     <button id="nextBtn" class="nav-btn">Next</button>
     <button id="submitBtn" class="nav-btn" onclick="Submit_1()">Submit</button>
+</div>
+
+<div class="modal__container" id="modal-container">
+  
+  <div class="modal__content">
+
+    {% csrf_token %}
+
+    <div style="display: none;" class="modal_loader">
+      <div class="custom-loader-2"></div>
+    </div>
+
+  </div>
+
 </div>
 
 {% else %}

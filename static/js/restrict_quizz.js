@@ -18,6 +18,13 @@ function Restrict_Quizz() {
         // Get the input value
         var new_quizz_password = prompt('Enter a password');
 
+        // Check if user canceled the prompt
+        if (new_quizz_password === null) {
+            // Uncheck the checkbox and notify the user
+            $('#inpLock').prop('checked', false);
+            return; // Exit the function
+        }
+
         // Send an AJAX request to the same URL with CSRF token
         if (new_quizz_password !== '') {
             

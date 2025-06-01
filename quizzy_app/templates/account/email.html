@@ -3,88 +3,190 @@
 {% block head_title %}
     {% trans "Email Addresses" %}
 {% endblock head_title %}
+
+{% block extra_head %}
+<style>
+    body {
+        background-color: white;
+        color: #333;
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .card-header {
+        background-color: #007bff;
+        color: white;
+        padding: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+    }
+    .card-body {
+        padding: 20px;
+        text-align: center;
+    }
+    .card-footer {
+        padding: 15px;
+        background-color: #f8f9fa;
+        text-align: center;
+    }
+    h1, h2 {
+        color: #007bff;
+        margin-bottom: 20px;
+    }
+    .btn-primary, .btn-danger {
+        margin: 10px;
+        height: 40px;
+        width: 100px;
+        border-radius: 10px;
+        color: white;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+    }
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+    .badge-success {
+        background-color: #28a745;
+        color: white;
+        padding: 5px 8px;
+        border-radius: 5px;
+    }
+    .badge-warning {
+        background-color: #ffc107;
+        color: black;
+        padding: 5px 8px;
+        border-radius: 5px;
+    }
+    .badge-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 5px 8px;
+        border-radius: 5px;
+    }
+    input[type="radio"] {
+        margin-right: 10px;
+    }
+    .email-entry {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    input[type="text"], input[type="email"] {
+        width: 80%;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+</style>
+{% endblock extra_head %}
+
 {% block content %}
-    {% element h1 %}
-        {% trans "Email Addresses" %}
-    {% endelement %}
-    {% if emailaddresses %}
-        {% element p %}
-            {% trans 'The following email addresses are associated with your account:' %}
-        {% endelement %}
-        {% url 'account_email' as email_url %}
-        {% element form form=form action=email_url method="post" tags="email,list" %}
-            {% slot body %}
-                {% csrf_token %}
-                {% for radio in emailaddress_radios %}
-                    {% with emailaddress=radio.emailaddress %}
-                        {% element field type="radio" checked=radio.checked name="email" value=emailaddress.email id=radio.id %}
-                            {% slot label %}
-                                {{ emailaddress.email }}
+<div class="container">
+    <div class="card">
+        <div class="card-header">{% trans "Email Addresses" %}</div>
+        <div class="card-body">
+            {% if emailaddresses %}
+                <p>{% trans 'The following email addresses are associated with your account:' %}</p>
+                {% url 'account_email' as email_url %}
+                <form action="{{ email_url }}" method="post">
+                    {% csrf_token %}
+                    {% for radio in emailaddress_radios %}
+                        {% with emailaddress=radio.emailaddress %}
+                            <div class="email-entry">
+                                <input type="radio" name="email" value="{{ emailaddress.email }}" id="{{ radio.id }}" {% if radio.checked %}checked{% endif %}>
+                                <label for="{{ radio.id }}">{{ emailaddress.email }}</label>
                                 {% if emailaddress.verified %}
-                                    {% element badge tags="success,email,verified" %}
-                                        {% translate "Verified" %}
-                                    {% endelement %}
+                                    <span class="badge-success">{% trans "Verified" %}</span>
                                 {% else %}
-                                    {% element badge tags="warning,email,unverified" %}
-                                        {% translate "Unverified" %}
-                                    {% endelement %}
+                                    <span class="badge-warning">{% trans "Unverified" %}</span>
                                 {% endif %}
                                 {% if emailaddress.primary %}
-                                    {% element badge tags="email,primary" %}
-                                        {% translate "Primary" %}
-                                    {% endelement %}
+                                    <span class="badge-primary">{% trans "Primary" %}</span>
                                 {% endif %}
-                            {% endslot %}
-                        {% endelement %}
-                    {% endwith %}
-                {% endfor %}
-            {% endslot %}
-            {% slot actions %}
-                {% element button type="submit" name="action_primary" %}
-                    {% trans 'Make Primary' %}
-                {% endelement %}
-                {% element button tags="secondary" type="submit" name="action_send" %}
-                    {% trans 'Re-send Verification' %}
-                {% endelement %}
-                {% element button tags="danger,delete" type="submit" name="action_remove" %}
-                    {% trans 'Remove' %}
-                {% endelement %}
-            {% endslot %}
-        {% endelement %}
+                            </div>
+                        {% endwith %}
+                    {% endfor %}
+        </div>
+        <div class="card-footer">
+            <div class="button-group">
+                <button class="btn-primary" type="submit" name="action_primary">{% trans 'Make Primary' %}</button>
+                <button class="btn-primary" type="submit" name="action_send">{% trans 'Re-send Verification' %}</button>
+                <button class="btn-danger" type="submit" name="action_remove">{% trans 'Remove' %}</button>
+            </div>
+        </div>
+        </form>
     {% else %}
         {% include "account/snippets/warn_no_email.html" %}
     {% endif %}
+    </div>
+
     {% if can_add_email %}
-        {% element h2 %}
-            {% trans "Add Email Address" %}
-        {% endelement %}
-        {% url 'account_email' as action_url %}
-        {% element form form=form method="post" action=action_url tags="email,add" %}
-            {% slot body %}
-                {% csrf_token %}
-                {% element fields form=form %}
-                {% endelement %}
-            {% endslot %}
-            {% slot actions %}
-                {% element button name="action_add" type="submit" %}
-                    {% trans "Add Email" %}
-                {% endelement %}
-            {% endslot %}
-        {% endelement %}
+        <div class="card mt-3">
+            <div class="card-header">{% trans "Add Email Address" %}</div>
+            <div class="card-body">
+                {% url 'account_email' as action_url %}
+                <form method="post" action="{{ action_url }}">
+                    {% csrf_token %}
+                    <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="card-footer">
+                <button class="btn-primary" type="submit" name="action_add">{% trans "Add Email" %}</button>
+                </form>
+            </div>
+        </div>
     {% endif %}
+</div>
 {% endblock content %}
+
 {% block extra_body %}
-    <script type="text/javascript">
+<script>
 (function() {
-  var message = "{% trans 'Do you really want to remove the selected email address?' %}";
-  var actions = document.getElementsByName('action_remove');
-  if (actions.length) {
-    actions[0].addEventListener("click", function(e) {
-      if (! confirm(message)) {
-        e.preventDefault();
-      }
-    });
-  }
+    var message = "{% trans 'Do you really want to remove the selected email address?' %}";
+    var actions = document.getElementsByName('action_remove');
+    if (actions.length) {
+        actions[0].addEventListener("click", function(e) {
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        });
+    }
 })();
-    </script>
+</script>
 {% endblock extra_body %}

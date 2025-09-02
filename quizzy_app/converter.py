@@ -7,7 +7,7 @@ import tempfile
 import re
 
 def OCR(FILE):
-    genai.configure(api_key='AIzaSyBZTDDRhL8BQZm2eqx54XwE32e2V5g3etA')
+    genai.configure(api_key='AIzaSyBu75ACse1nzm1n9L97bfVJS7FmEB2JzKc')
 
     def fetch_from_cloudinary(cloudinary_url):
         response = requests.get(cloudinary_url)
